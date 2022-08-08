@@ -7,36 +7,25 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Scanner;
 
 public class Fox {
 	
 	private static final Interpreter INTERPRETER = new Interpreter();
 	static boolean hadError;
 	static boolean hadRuntimeError;
+	public static Scanner sc = new Scanner(System.in);
 
 	public static void main(String[] args) throws IOException {
-//		if (args.length > 1) {
-//			System.out.println("Usage: jlox [script]");
-//			System.exit(64);
-//		} else if (args.length == 1) {
-//			runFile(args[0]);
-//		} else {
-//			runPrompt();
-//		}
-		runFile("src/main/resources/script.fox");
-		
-//		String src = "// define a function\r\n"
-//				+ "defun(h1, (text) ->\r\n"
-//				+ "  (\"<h1>\" + text + \"</h1>\")\r\n"
-//				+ ")\r\n"
-//				+ "\r\n"
-//				+ "// shortcut\r\n"
-//				+ "var capturedH2 = defun(h2, (text) -> \"<h2>\" + text + \"</h2>\")\r\n"
-//				+ "\r\n"
-//				+ "var(title, h1(\"Hello World\"))\r\n"
-//				+ "\r\n"
-//				+ "if((true), print(title), print(h2(\"Subtitle\")))";
-//		run(src);
+		if (args.length > 1) {
+			System.out.println("Usage: jlox [script]");
+			System.exit(64);
+		} else if (args.length == 1) {
+			runFile(args[0]);
+		} else {
+			runPrompt();
+		}
+//		runFile("src/main/resources/script.fox");
 	}
 
 	private static void runFile(String path) throws IOException {
