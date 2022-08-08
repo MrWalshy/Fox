@@ -29,7 +29,9 @@ public class GenerateAst {
 		      "Function : Token identifier, List<Token> params, Expression body",
 		      "Variable : Token name",
 		      "Assign   : Token name, Expression assignment",
-		      "Import   : Token file"
+		      "Import   : Token file",
+		      "Array    : List<Expression> elements, Token closingBracket",
+		      "ArrayCall : Expression callee, Token index, Token upperBound, Token closingBracket"
 	    ));
 	}
 
