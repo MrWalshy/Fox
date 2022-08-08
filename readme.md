@@ -1,98 +1,186 @@
 # Fox
 
-Idea: A language based on function expressions. Everything in the language is either a function expression or some atomic value in the language.
+Fox, a dynamically typed, interpreted expression-based programming language.
 
-- Some built-in statements and operations will exist for extending the languages functionality.
+In Fox, everything is an expression and thus returns a value.
 
-## Spec
+## Example script
 
-An example of the language:
+A quick example to show what Fox is capable of:
 
-```
-// define a function
-defun(h1, (text) ->
-  ("<h1>" + text + "</h1>")
-)
-
-// shortcut
-var capturedH2 = defun(h2, (text) -> "<h2>" + text + "</h2>")
-
-var(title, h1("Hello World"));
-
-if((true), print(title), print(h2("Subtitle")))
-```
-
-As everything is an expression, everything will implicitly return a value. The last line in a function returns its value for example.
-
-### Grammar
-
-#### Primary
-
-These concern the core primitive data in the language that can be passed around like a variable or result in a value when evaluated:
+```fox
 
 ```
-primary          -> "true" | "false" | "null"
-                  | NUMBER | STRING
-                  | "(" expression ")"
-                  | IDENTIFIER
-                  | functionDefiner ;
 
-functionDefiner  -> "defun" "(" IDENTIFIER "," function ")" ;
-function         -> "(" parameters? ")" "->" expression ;
-parameters       -> IDENTIFIER ( "," IDENTIFIER )* ;
-```
+## Language reference
 
-The function definer is used to define the languages functionality. Core types are similar to Lox to help keep it similar.
+### Data types
 
-#### Function calling
+Fox supports only a limited number of data types, specifically:
 
-Same as Lox:
+- number
 
-```
-call             -> primary ( "(" arguments? ")" )+ ;
-arguments        -> expression ( "," expression )* ;
-```
+- string
 
-- may be multiple calls in terms of a closure, always at least one call is made
-- arguments are optional, many may be specified
+- boolean
 
-#### Other stuff is the same as Lox really
+- null
+
+These are the core atomic data types. Each of these types resolve to a value.
+
+#### number
+
+A number is simple to use:
 
 ```
-program                 -> expression* EOF ;
+0
+```
 
-expression              -> ternaryExpression 
-                         | expressionBlock 
-                         | functionDefiner
-                         | varDefiner
-                         | varAssignment ;
-                         
-functionDefiner         -> "defun" "(" STRING "," function ")" ;
-function                -> "(" parameters? ")" "->" ( expressionBlock | ternaryExpression | function );
-parameters              -> IDENTIFIER ( "," IDENTIFIER )* ;
-
-varDefiner              -> "var" "(" STRING "," ( expressionBlock | ternaryExpression ) ")" ;
-
-varAssignment           -> "assign" "(" IDENTIFIER "," ( expressionBlock | ternaryExpression ) ")" ;
-
-expressionBlock         -> "{" expression ( "," expression )* "}" ;
-
-ternaryExpression       -> logicOr ( "?" expression : expression )? ;
-logicOr                 -> logicAnd ( "or" logicAnd )* ;
-logicAnd                -> equality ( "and" equality )* ;
-equality                -> comparison ( ( "!=" | "==" ) comparison )* ;
-comparison              -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
-term                    -> factor ( ( "-" | "+" ) factor )* ;
-factor                  -> unary ( ( "/" | "*" ) unary )* ;
-unary                   -> ( "!" | "-" ) unary | call ;
-
-call                    -> primary ( "(" arguments? ")" )+ ;
-arguments               -> expression ( "," expression )* ;
-
-primary                 -> "true" | "false" | "null"
-                         | NUMBER | STRING
-                         | "(" expression ")"
-                         | IDENTIFIER 
-                         | "defun" "(" function ")" ;
+Numbers can be whole or floating-point:
 
 ```
+0.0
+```
+
+#### string
+
+A string is a sequence of characters wrapped in double quotes:
+
+```
+"Hello world"
+```
+
+The newline escape character is also valid in a string:
+
+```
+"Hello\nWorld"
+```
+
+- if output to the console, it will be split over two lines
+
+As `\` is the escape character, you can use it to escape itself in text:
+
+```
+"Hello\\World"
+```
+
+#### boolean
+
+A boolean is a truthy or falsey value. In Fox, `null` and `\0` are considered falsey, everything else is truthy.
+
+Boolean values are represented using `true` or `false`.
+
+### Variables
+
+A variable is a container for your data, use the built-in `var` function to declare a new variable:
+
+```
+var(identifier, "value")
+```
+
+A variable defined in the global scope will be accessible everywhere in the program. A new lexical scope can be created using curly braces:
+
+```
+var(global, "global variable")
+
+{
+  var(inner, "inner variable")
+}
+
+print(global) // global variable
+print(inner) // runtime error
+```
+
+A variable can be redeclared in the global scope:
+
+```
+var(global, 1)
+var(global, 2)
+```
+
+But a variable cannot be redeclared in a local scope:
+
+```
+{
+  var(scoped, 22)
+  var(scoped, 30) // static analysis error
+}
+```
+
+A variable also cannot reference itself when being defined:
+
+```
+{
+  var(scoped, scoped) // runtime error
+}
+```
+
+### Expressions
+
+In Fox, everything is an expression. This means even `var` calls return a value:
+
+```
+var(x, var(y, 32))
+print(x) // 32
+```
+
+Expressions are also not delimited by a semi-colon like most languages - this is due to the expression based nature of the language allowing for it.
+
+An expression block can be used to create a new local lexical scope:
+
+```
+{
+  var(x, 32)
+}
+```
+
+We can also specify multiple expressions in an expression block:
+
+```
+{
+  var(x, 32)
+  x + 5
+}
+```
+
+In an expression block, the result of the last expression is returned. In the last example, the expression block returns `37` and could be used in a variable assignment:
+
+```
+var(a, {
+  var(x, 50)
+  x + 5
+})
+```
+
+In this case, `a` would be set to `55`, the value returned from the expression block.
+
+### Function definitions
+
+A new function can be defined using the `defun` expression:
+
+```
+defun(println, (str) -> {
+  print(str + "\n")
+})
+```
+
+Function definition expressions accept an identifier as the first parameter followed by a lambda function representing the function.
+
+The parenthesis are the formal parameters of the function whilst everything after the `->` is the body.
+
+It is not necessary to use a block for a function definition:
+
+```
+defun(println, (str) -> print(str + "\n"))
+```
+
+Function expressions can also be created, which can then be passed around like any other first class member:
+
+```
+var(doSomething, defun(() -> print("Hello")))
+
+// call it
+doSomething() // Hello
+```
+
+## Library reference
