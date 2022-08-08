@@ -358,7 +358,7 @@ public class Tokeniser {
 
 		// Trim the surrounding quotes.
 		String value = src.substring(start + 1, current - 1);
-		addToken(STRING, value);
+		addToken(STRING, unescapeString(value));
 	}
 	
 	private void singleLineComment() {
@@ -387,5 +387,35 @@ public class Tokeniser {
 			}
 		}
 		if (hadError) Fox.error(line, "Block comment not terminated");
+	}
+	
+	private String unescapeString(String src) {
+		StringBuilder sb = new StringBuilder();
+		
+		for (int i = 0; i < src.length(); i++) {
+			char current = src.charAt(i);
+			if (current == '\\') { 
+				char next = src.charAt(i + 1);
+				// check for another slash, meaning
+				// the backslash is wanted
+				// check for escape character
+				// one ahead, if so consume it
+				switch (next) {
+				case '\\':
+					// add single backslash to buffer
+					sb.append('\\');
+					// increment past the next slash
+					i++;
+					break;
+				case 'n':
+					sb.append('\n');
+					i++;
+					break;
+				}
+				continue;
+			}
+			sb.append(current);
+		}
+		return sb.toString();
 	}
 }
