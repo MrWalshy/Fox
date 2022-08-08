@@ -45,12 +45,13 @@ public class Fox {
 			String line = reader.readLine();
 			if (line == null)
 				break;
-			run(line);
+			String output = run(line);
+			System.out.println("\n" + line + " ===> " + output);
 			hadError = false;
 		}
 	}
 
-	private static void run(String src) {
+	private static String run(String src) {
 		// Lexical analysis
 		Tokeniser tokeniser = new Tokeniser(src);
 		List<Token> tokens = tokeniser.scanTokens();
@@ -59,38 +60,39 @@ public class Fox {
 		Parser parser = new Parser(tokens);
 		List<Expression> expressions = parser.parse();
 		
-		if (hadError) return;
+		if (hadError) return null;
 		
 		// Static analysis
 		Resolver resolver = new Resolver(INTERPRETER);
 		resolver.resolve(expressions);
 		
-		if (hadError) return;
+		if (hadError) return null;
 		
-		// interpretation (execution)
-		if (expressions.size() == 1) {
-			Object result = INTERPRETER.interpret(expressions.get(0));
-			System.out.println("\n" + src + " ===> " + result.toString());
-		} else {
-			INTERPRETER.interpret(expressions);
-		}
+		return INTERPRETER.interpret(expressions);
+		
+//		// interpretation (execution)
+//		if (expressions.size() == 1) {
+//			Object result = INTERPRETER.interpret(expressions.get(0));
+//			
+//		} else {
+//			
+//		}
 	}
 	
 	public static Object evaluate(String src) {
-		Interpreter interpreter = new Interpreter();
 		Tokeniser tokeniser = new Tokeniser(src);
 		List<Token> tokens = tokeniser.scanTokens();
 		
 		Parser parser = new Parser(tokens);
 		List<Expression> expressions = parser.parse();
 		
-		Resolver resolver = new Resolver(interpreter);
+		Resolver resolver = new Resolver(INTERPRETER);
 		resolver.resolve(expressions);
 		
 		for (int i = 0; i < expressions.size() - 1; i++) {
-			interpreter.interpret(expressions.get(i));
+			INTERPRETER.interpret(expressions.get(i));
 		}
-		return interpreter.interpret(expressions.get(expressions.size() - 1));
+		return INTERPRETER.interpret(expressions.get(expressions.size() - 1));
 	}
 	
 	static void error(int line, String message) {

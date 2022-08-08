@@ -183,4 +183,47 @@ var(doSomething, defun(() -> print("Hello")))
 doSomething() // Hello
 ```
 
+### Import expression
+
+The `import` expression is used to import a file and execute its contents in the given scope:
+
+```
+import("some/file/location")
+```
+
+To prevent a runtime-error occurring, an error will be thrown during static analysis (compile-time) by the `Resolver`.
+
+Once you have imported a file, its top-level functions and variables will be available to you.
+
+If this file is a script, you could also capture its output:
+
+```
+var(x, import("some/file/location"))
+```
+
+This will capture the output of the last expression in the file. It will also evaluate its contents in the scope it is called in.
+
+```
+var(x, "original")
+{
+  var(x, import("some/file/location"))
+}
+print(x) // original
+```
+
+As can be seen above, the `x` declared in the outer scope retains its original value.
+
+The `import` expression can also be used to import a function directly from a file into a variable. Given a file called `add.fox` containing:
+
+```
+defun((a,b) -> a + b)
+```
+
+When imported, it can be assigned to a variable and then used like a normal function (this also works with named functions):
+
+```
+var(add, import("src/main/resources/add.fox")) // <fn>
+add(10,10) // 20
+```
+
 ## Library reference

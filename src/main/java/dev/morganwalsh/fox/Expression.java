@@ -16,6 +16,7 @@ public abstract class Expression {
     R visitFunctionExpression(Function expression);
     R visitVariableExpression(Variable expression);
     R visitAssignExpression(Assign expression);
+    R visitImportExpression(Import expression);
   }
   static class Var extends Expression {
     Var(Token name, Expression initialiser) {
@@ -188,6 +189,18 @@ public abstract class Expression {
 
     final Token name;
     final Expression assignment;
+  }
+  static class Import extends Expression {
+    Import(Token file) {
+      this.file = file;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitImportExpression(this);
+    }
+
+    final Token file;
   }
 
   abstract <R> R accept(Visitor<R> visitor);

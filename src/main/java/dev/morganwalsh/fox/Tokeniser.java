@@ -36,6 +36,7 @@ import static dev.morganwalsh.fox.TokenType.WHILE;
 import static dev.morganwalsh.fox.TokenType.LEFT_CURLY;
 import static dev.morganwalsh.fox.TokenType.RIGHT_CURLY;
 import static dev.morganwalsh.fox.TokenType.ASSIGN;
+import static dev.morganwalsh.fox.TokenType.IMPORT;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,6 +60,7 @@ public class Tokeniser {
 		keywords.put("while", WHILE);
 		keywords.put("if", IF);
 		keywords.put("assign", ASSIGN);
+		keywords.put("import", IMPORT);
 	}
 	
 	/**

@@ -1,5 +1,8 @@
 package dev.morganwalsh.fox;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,6 +15,7 @@ import dev.morganwalsh.fox.Expression.Block;
 import dev.morganwalsh.fox.Expression.Call;
 import dev.morganwalsh.fox.Expression.Function;
 import dev.morganwalsh.fox.Expression.Grouping;
+import dev.morganwalsh.fox.Expression.Import;
 import dev.morganwalsh.fox.Expression.Literal;
 import dev.morganwalsh.fox.Expression.Logical;
 import dev.morganwalsh.fox.Expression.Ternary;
@@ -120,7 +124,8 @@ public class Interpreter implements Expression.Visitor<Object> {
 		try {
 			currentEnvironment = new Environment(enclosing);
 			for (int i = 0; i < expression.expressions.size() - 1; i++) interpret(expression.expressions.get(i));
-			output = interpret(expression.expressions.get(expression.expressions.size() - 1));
+			Expression tail = expression.expressions.get(expression.expressions.size() - 1);
+			output = interpret(tail);
 		} finally {
 			// restore the enclosing environment after scope exits
 			currentEnvironment = enclosing;
@@ -319,6 +324,18 @@ public class Interpreter implements Expression.Visitor<Object> {
 	 */
 	public void resolve(Expression expression, int hops) {
 		locals.put(expression, hops);
+	}
+
+	@Override
+	public Object visitImportExpression(Import expression) {
+		Object output = null;
+		try {
+			String src = Files.readString(Path.of(expression.file.literal.toString()));
+			output = Fox.evaluate(src);
+		} catch (IOException e) {
+			throw new RuntimeError(expression.file, "Something went wrong trying to access '" + expression.file.literal + "'.");
+		}
+		return output;
 	}
 	
 }

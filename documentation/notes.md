@@ -65,7 +65,8 @@ expression              -> ternaryExpression
                          | expressionBlock 
                          | functionDefiner
                          | varDefiner
-                         | varAssignment ;
+                         | varAssignment 
+                         | import ;
                          
 functionDefiner         -> "defun" "(" STRING "," function ")" ;
 function                -> "(" parameters? ")" "->" ( expressionBlock | ternaryExpression | function );
@@ -74,6 +75,8 @@ parameters              -> IDENTIFIER ( "," IDENTIFIER )* ;
 varDefiner              -> "var" "(" STRING "," ( expressionBlock | ternaryExpression ) ")" ;
 
 varAssignment           -> "assign" "(" IDENTIFIER "," ( expressionBlock | ternaryExpression ) ")" ;
+
+import                  -> "import" "(" STRING ")" ;
 
 expressionBlock         -> "{" expression ( "," expression )* "}" ;
 

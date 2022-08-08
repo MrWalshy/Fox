@@ -1,5 +1,7 @@
 package dev.morganwalsh.fox;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +13,7 @@ import dev.morganwalsh.fox.Expression.Block;
 import dev.morganwalsh.fox.Expression.Call;
 import dev.morganwalsh.fox.Expression.Function;
 import dev.morganwalsh.fox.Expression.Grouping;
+import dev.morganwalsh.fox.Expression.Import;
 import dev.morganwalsh.fox.Expression.Literal;
 import dev.morganwalsh.fox.Expression.Logical;
 import dev.morganwalsh.fox.Expression.Ternary;
@@ -228,6 +231,16 @@ public class Resolver implements Expression.Visitor<Void> {
 		resolve(expression.assignment);
 		// resolve the variable being assigned to
 		resolveLocalVariable(expression, expression.name);
+		return null;
+	}
+
+	@Override
+	public Void visitImportExpression(Import expression) {
+		// compile-time static check of whether the file exists or not would be good
+		// here, prevent run-time error of it not existing
+		if (!Files.exists(Path.of(expression.file.literal.toString()))) {
+			Fox.error(expression.file.line, "Cannot find file '" + expression.file.lexeme + "'.");
+		}
 		return null;
 	}
 

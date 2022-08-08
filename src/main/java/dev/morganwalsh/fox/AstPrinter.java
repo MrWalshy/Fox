@@ -8,6 +8,7 @@ import dev.morganwalsh.fox.Expression.Block;
 import dev.morganwalsh.fox.Expression.Call;
 import dev.morganwalsh.fox.Expression.Function;
 import dev.morganwalsh.fox.Expression.Grouping;
+import dev.morganwalsh.fox.Expression.Import;
 import dev.morganwalsh.fox.Expression.Literal;
 import dev.morganwalsh.fox.Expression.Logical;
 import dev.morganwalsh.fox.Expression.Ternary;
@@ -150,6 +151,11 @@ public class AstPrinter implements Expression.Visitor<String> {
 	@Override
 	public String visitAssignExpression(Assign expression) {
 		return parenthesize(expression.name.lexeme, expression.assignment);
+	}
+
+	@Override
+	public String visitImportExpression(Import expression) {
+		return parenthesize("import " + expression.file.lexeme);
 	}
 
 }

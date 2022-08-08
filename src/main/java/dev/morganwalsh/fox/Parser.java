@@ -91,6 +91,7 @@ public class Parser {
 				consume(DEFUN, null);
 				return function("function");
 			}
+			if (match(IMPORT)) return importExpression();
 			if (match(VAR)) return var();
 			if (match(ASSIGN)) return assign();
 //			if (match(LEFT_CURLY)) return block();
@@ -98,6 +99,13 @@ public class Parser {
 //		} catch (ParseError error) {
 //			return null;
 //		}
+	}
+
+	private Expression importExpression() {
+		consume(LEFT_PAREN, "Expected '(' after import declaration.");
+		Token file = consume(STRING, "Expected file location.");
+		consume(RIGHT_PAREN, "Expected ')' after file location.");
+		return new Expression.Import(file);
 	}
 
 	private Expression block() {
@@ -173,10 +181,11 @@ public class Parser {
 		if (check(COMMA)) {
 			consume(COMMA, null);
 			
-			if (check(LEFT_CURLY)) {
-				consume(LEFT_CURLY, "Expected start of expression block after identifier argument.");
-				initialiser = block();
-			} else initialiser = ternaryExpression();
+//			if (check(LEFT_CURLY)) {
+//				consume(LEFT_CURLY, "Expected start of expression block after identifier argument.");
+//				initialiser = block();
+//			} else initialiser = ternaryExpression();
+			initialiser = expression();
 		}
 		
 		consume(RIGHT_PAREN, "Expect ')' after var definition call arguments.");
