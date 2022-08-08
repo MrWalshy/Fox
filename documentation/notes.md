@@ -96,6 +96,6 @@ primary                 -> "true" | "false" | "null"
                          | NUMBER | STRING
                          | "(" expression ")"
                          | IDENTIFIER 
-                         | "defun" "(" function ")" ;
+                         | "'" function ;
 
 ```

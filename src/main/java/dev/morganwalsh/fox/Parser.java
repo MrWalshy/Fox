@@ -135,7 +135,10 @@ public class Parser {
 		
 		// arrow function style definition starts here for the parameters and body
 		// of the actual function
-		consume(LEFT_PAREN, "Expected '(' before parameter list.");
+		if (kind.equals("function")) {
+			// no need to consume if anonymous
+			consume(LEFT_PAREN, "Expected '(' before parameter list.");
+		}
 		List<Token> params = new ArrayList<>();
 		if (!check(RIGHT_PAREN)) {
 			do {
@@ -147,29 +150,32 @@ public class Parser {
 		
 		Expression body = getBody();
 		
-		// close the call to defun
-		consume(RIGHT_PAREN, "Expected ')' to close defun call.");
+		if (kind.equals("function")) {
+			// close the call to defun, not necessary for anonymous function
+			consume(RIGHT_PAREN, "Expected ')' to close defun call.");
+		}
 		
 		return new Expression.Function(identifier, params, body);
 	}
 	
 	private Expression getBody() {
-		if (match(LEFT_CURLY)) return block();
-		else if (check(LEFT_PAREN)) {
-			// arrow function style definition starts here for the parameters and body
-			// of the actual function
-			consume(LEFT_PAREN, "Expected '(' before parameter list.");
-			List<Token> params = new ArrayList<>();
-			if (!check(RIGHT_PAREN)) {
-				do {
-					params.add(consume(IDENTIFIER, "Expected parameter name"));
-				} while (match(COMMA));
-			}
-			consume(RIGHT_PAREN, "Expect ')' after function parameter list.");
-			consume(ARROW, "Expected an '->' after function parameter list");
-			return new Expression.Function(null, params, getBody());
-		}
-		else return ternaryExpression();
+//		if (match(LEFT_CURLY)) return block();
+//		else if (check(LEFT_PAREN)) {
+//			// arrow function style definition starts here for the parameters and body
+//			// of the actual function
+//			consume(LEFT_PAREN, "Expected '(' before parameter list.");
+//			List<Token> params = new ArrayList<>();
+//			if (!check(RIGHT_PAREN)) {
+//				do {
+//					params.add(consume(IDENTIFIER, "Expected parameter name"));
+//				} while (match(COMMA));
+//			}
+//			consume(RIGHT_PAREN, "Expect ')' after function parameter list.");
+//			consume(ARROW, "Expected an '->' after function parameter list");
+//			return new Expression.Function(null, params, getBody());
+//		}
+//		else return ternaryExpression();
+		return expression();
 	}
 
 	private Expression var() {
@@ -358,7 +364,7 @@ public class Parser {
 		if (match(FALSE)) return new Expression.Literal(false);
 		if (match(TRUE)) return new Expression.Literal(true);
 		if (match(NULL)) return new Expression.Literal(null);
-		if (match(DEFUN)) return function("anonymous");
+		if (match(APOSTROPHE)) return function("anonymous");
 		if (match(LEFT_CURLY)) return block();
 		
 		if (match(NUMBER, STRING)) return new Expression.Literal(previous().literal);
@@ -366,8 +372,7 @@ public class Parser {
 		if (match(IDENTIFIER)) return new Expression.Variable(previous());
 		
 		if (match(LEFT_PAREN)) {
-			// check if a ternary or not
-			// - maybe not necessary if i treat the group as a ternary expression
+			// look for arrow
 //			int lookahead = 1;
 //			boolean isTernary = false;
 //			while (!checkAhead(RIGHT_PAREN, lookahead)) {
