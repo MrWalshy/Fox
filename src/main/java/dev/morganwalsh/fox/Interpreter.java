@@ -4,11 +4,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import dev.morganwalsh.fox.Expression.Array;
+import dev.morganwalsh.fox.Expression.ArrayCall;
 import dev.morganwalsh.fox.Expression.Assign;
 import dev.morganwalsh.fox.Expression.Binary;
 import dev.morganwalsh.fox.Expression.Block;
@@ -190,6 +193,40 @@ public class Interpreter implements Expression.Visitor<Object> {
 		}
 		return null;
 	}
+	
+	@Override
+	public Object visitArrayCallExpression(ArrayCall expression) {
+		Object array = interpret(expression.callee);
+		
+		if (!(array instanceof Object[])) {
+			throw new RuntimeError(expression.closingBracket, "Can only access arrays using `[]` syntax.");
+		}
+		Object[] arr = (Object[]) array;
+		
+		// empty array
+		if (arr.length == 0) {
+			throw new RuntimeError(expression.closingBracket, "Cannot access an empty array.");
+		}
+		
+		int index = ((Double) expression.index.literal).intValue();
+		// index is too big or index is too small
+		if (arr.length <= index || index < 0) {
+			throw new RuntimeError(expression.closingBracket, "Array index out of bounds '" + index + "'.");
+		}
+		
+		if (expression.upperBound != null) {
+			int upperBound = ((Double) expression.upperBound.literal).intValue();
+			if (arr.length <= upperBound || upperBound < 0) {
+				throw new RuntimeError(expression.closingBracket, "Array index out of bounds '" + index + "'.");
+			}
+			if (index > upperBound) {
+				throw new RuntimeError(expression.closingBracket, "Array index '" + index + "' is greater than the upper bound '" + upperBound + "'.");
+			}
+			
+			return Arrays.copyOfRange(arr, index, upperBound);
+		}
+		return arr[index];
+	}
 
 	@Override
 	public Object visitCallExpression(Call expression) {
@@ -269,6 +306,18 @@ public class Interpreter implements Expression.Visitor<Object> {
 		} else function = new FoxFunction(null, expression, currentEnvironment);
 		return function;
 	}
+	
+	@Override
+	public Object visitArrayExpression(Array expression) {
+		List<Object> values = new ArrayList<>();
+		
+		for (Expression element : expression.elements) {
+			values.add(interpret(element));
+		}
+		return values.toArray();
+	}
+
+	
 
 	@Override
 	public Object visitVariableExpression(Variable expression) {

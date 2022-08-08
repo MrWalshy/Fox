@@ -17,6 +17,8 @@ public abstract class Expression {
     R visitVariableExpression(Variable expression);
     R visitAssignExpression(Assign expression);
     R visitImportExpression(Import expression);
+    R visitArrayExpression(Array expression);
+    R visitArrayCallExpression(ArrayCall expression);
   }
   static class Var extends Expression {
     Var(Token name, Expression initialiser) {
@@ -201,6 +203,38 @@ public abstract class Expression {
     }
 
     final Token file;
+  }
+  static class Array extends Expression {
+    Array(List<Expression> elements, Token closingBracket) {
+      this.elements = elements;
+      this.closingBracket = closingBracket;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitArrayExpression(this);
+    }
+
+    final List<Expression> elements;
+    final Token closingBracket;
+  }
+  static class ArrayCall extends Expression {
+    ArrayCall(Expression callee, Token index, Token upperBound, Token closingBracket) {
+      this.callee = callee;
+      this.index = index;
+      this.upperBound = upperBound;
+      this.closingBracket = closingBracket;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitArrayCallExpression(this);
+    }
+
+    final Expression callee;
+    final Token index;
+    final Token upperBound;
+    final Token closingBracket;
   }
 
   abstract <R> R accept(Visitor<R> visitor);

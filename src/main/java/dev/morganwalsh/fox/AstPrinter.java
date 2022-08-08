@@ -2,6 +2,8 @@ package dev.morganwalsh.fox;
 
 import java.util.List;
 
+import dev.morganwalsh.fox.Expression.Array;
+import dev.morganwalsh.fox.Expression.ArrayCall;
 import dev.morganwalsh.fox.Expression.Assign;
 import dev.morganwalsh.fox.Expression.Binary;
 import dev.morganwalsh.fox.Expression.Block;
@@ -156,6 +158,18 @@ public class AstPrinter implements Expression.Visitor<String> {
 	@Override
 	public String visitImportExpression(Import expression) {
 		return parenthesize("import " + expression.file.lexeme);
+	}
+
+	@Override
+	public String visitArrayExpression(Array expression) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visitArrayCallExpression(ArrayCall expression) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

@@ -89,13 +89,15 @@ term                    -> factor ( ( "-" | "+" ) factor )* ;
 factor                  -> unary ( ( "/" | "*" ) unary )* ;
 unary                   -> ( "!" | "-" ) unary | call ;
 
-call                    -> primary ( "(" arguments? ")" )+ ;
+call                    -> primary ( "(" arguments? ")" )+ 
+						   | primary "[" ( NUMBER | NUMBER, NUMBER ) "]"
 arguments               -> expression ( "," expression )* ;
 
 primary                 -> "true" | "false" | "null"
-                         | NUMBER | STRING
+                         | NUMBER | STRING | ARRAY
                          | "(" expression ")"
                          | IDENTIFIER 
                          | "'" function ;
 
+ARRAY                   -> "[" expression ( "," expression )* "]" ;
 ```

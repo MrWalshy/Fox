@@ -37,6 +37,8 @@ import static dev.morganwalsh.fox.TokenType.RIGHT_CURLY;
 import static dev.morganwalsh.fox.TokenType.ASSIGN;
 import static dev.morganwalsh.fox.TokenType.IMPORT;
 import static dev.morganwalsh.fox.TokenType.APOSTROPHE;
+import static dev.morganwalsh.fox.TokenType.LEFT_BRACKET;
+import static dev.morganwalsh.fox.TokenType.RIGHT_BRACKET;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -121,6 +123,12 @@ public class Tokeniser {
 		switch (c) {
 		case '\'':
 			addToken(APOSTROPHE);
+			break;
+		case '[':
+			addToken(LEFT_BRACKET);
+			break;
+		case ']':
+			addToken(RIGHT_BRACKET);
 			break;
 		case '(':
 			addToken(LEFT_PAREN);

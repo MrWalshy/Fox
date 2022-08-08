@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import dev.morganwalsh.fox.Expression.Array;
+import dev.morganwalsh.fox.Expression.ArrayCall;
 import dev.morganwalsh.fox.Expression.Assign;
 import dev.morganwalsh.fox.Expression.Binary;
 import dev.morganwalsh.fox.Expression.Block;
@@ -241,6 +243,18 @@ public class Resolver implements Expression.Visitor<Void> {
 		if (!Files.exists(Path.of(expression.file.literal.toString()))) {
 			Fox.error(expression.file.line, "Cannot find file '" + expression.file.lexeme + "'.");
 		}
+		return null;
+	}
+
+	@Override
+	public Void visitArrayExpression(Array expression) {
+		resolve(expression.elements);
+		return null;
+	}
+
+	@Override
+	public Void visitArrayCallExpression(ArrayCall expression) {
+		resolve(expression.callee);
 		return null;
 	}
 
