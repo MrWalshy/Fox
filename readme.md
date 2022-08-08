@@ -177,7 +177,7 @@ defun(println, (str) -> print(str + "\n"))
 Function expressions can also be created, which can then be passed around like any other first class member:
 
 ```
-var(doSomething, defun(() -> print("Hello")))
+var(doSomething, '() -> print("Hello"))
 
 // call it
 doSomething() // Hello
@@ -216,7 +216,7 @@ As can be seen above, the `x` declared in the outer scope retains its original v
 The `import` expression can also be used to import a function directly from a file into a variable. Given a file called `add.fox` containing:
 
 ```
-defun((a,b) -> a + b)
+'(a,b) -> a + b
 ```
 
 When imported, it can be assigned to a variable and then used like a normal function (this also works with named functions):

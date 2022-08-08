@@ -24,7 +24,6 @@ import static dev.morganwalsh.fox.TokenType.NULL;
 import static dev.morganwalsh.fox.TokenType.NUMBER;
 import static dev.morganwalsh.fox.TokenType.OR;
 import static dev.morganwalsh.fox.TokenType.PLUS;
-import static dev.morganwalsh.fox.TokenType.PRINT;
 import static dev.morganwalsh.fox.TokenType.QUESTION_MARK;
 import static dev.morganwalsh.fox.TokenType.RIGHT_PAREN;
 import static dev.morganwalsh.fox.TokenType.SLASH;
@@ -37,6 +36,7 @@ import static dev.morganwalsh.fox.TokenType.LEFT_CURLY;
 import static dev.morganwalsh.fox.TokenType.RIGHT_CURLY;
 import static dev.morganwalsh.fox.TokenType.ASSIGN;
 import static dev.morganwalsh.fox.TokenType.IMPORT;
+import static dev.morganwalsh.fox.TokenType.APOSTROPHE;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -119,6 +119,9 @@ public class Tokeniser {
 		char c = advance();
 		
 		switch (c) {
+		case '\'':
+			addToken(APOSTROPHE);
+			break;
 		case '(':
 			addToken(LEFT_PAREN);
 			break;
