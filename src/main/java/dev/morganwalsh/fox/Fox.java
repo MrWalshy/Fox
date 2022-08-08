@@ -69,7 +69,8 @@ public class Fox {
 		
 		// interpretation (execution)
 		if (expressions.size() == 1) {
-			System.out.println(INTERPRETER.interpret(expressions.get(0)));
+			Object result = INTERPRETER.interpret(expressions.get(0));
+			System.out.println("\n" + src + " ===> " + result.toString());
 		} else {
 			INTERPRETER.interpret(expressions);
 		}
