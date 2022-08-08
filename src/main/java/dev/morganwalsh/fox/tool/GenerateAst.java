@@ -28,7 +28,8 @@ public class GenerateAst {
 		      "Unary    : Token operator, Expression right",
 		      "Function : Token identifier, List<Token> params, Expression body",
 		      "Variable : Token name",
-		      "Assign   : Token name, Expression assignment"
+		      "Assign   : Token name, Expression assignment",
+		      "Import   : Token file"
 	    ));
 	}
 
