@@ -21,8 +21,10 @@ import dev.morganwalsh.fox.Expression.Variable;
 import dev.morganwalsh.fox.native_functions.Clock;
 import dev.morganwalsh.fox.native_functions.Evaluate;
 import dev.morganwalsh.fox.native_functions.Length;
-import dev.morganwalsh.fox.native_functions.Print;
+import dev.morganwalsh.fox.native_functions.io.CharacterToString;
+import dev.morganwalsh.fox.native_functions.io.GetCharacter;
 import dev.morganwalsh.fox.native_functions.io.Input;
+import dev.morganwalsh.fox.native_functions.io.Print;
 
 public class Interpreter implements Expression.Visitor<Object> {
 	
@@ -58,6 +60,8 @@ public class Interpreter implements Expression.Visitor<Object> {
 		globals.define("len", new Length());
 		globals.define("eval", new Evaluate());
 		globals.define("print", new Print());
+		globals.define("getch", new GetCharacter());
+		globals.define("charToStr", new CharacterToString());
 	}
 
 	String interpret(List<Expression> expressions) {
