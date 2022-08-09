@@ -9,8 +9,56 @@ In Fox, everything is an expression and thus returns a value.
 A quick example to show what Fox is capable of:
 
 ```fox
+// utilities
+defun(println, (value) -> print(value + "\n"))
+defun(addTo, (arr, value) -> merge(arr, [value]))
+defun(printAll, (arr) -> {
+  var(i, 0)
+  
+  while(i < len(arr), {
+    println(arr[i])
+    assign(i, i + 1)
+  })
+})
 
+// ui
+var(header, "##########
+#  Menu  #
+##########")
+var(items, "[1] Add a note
+[2] Read notes
+[3] Exit")
+
+// encapsulate sensitive data
+{
+	var(notes, [])
+	
+	// simple repl
+	while({
+	  println(header)
+	  println(items)
+	  var(in, input("> "))
+	  match in {
+	    "1" => assign(notes, addTo(notes, input("Note: ")))
+	    "2" => printAll(notes)
+	    "3" => break()
+	    _   => println("Invalid input.")
+	  }
+	})
+}
 ```
+
+This program offers an infinite loop, only exiting when the user types the string `3` and presses enter. This is making use of various features of the language:
+
+- functions
+
+- iteration
+
+- arrays
+
+- match expressions
+
+- encapsulation
 
 ## Language reference
 

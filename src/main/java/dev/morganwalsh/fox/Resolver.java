@@ -15,6 +15,7 @@ import dev.morganwalsh.fox.Expression.Block;
 import dev.morganwalsh.fox.Expression.Call;
 import dev.morganwalsh.fox.Expression.Case;
 import dev.morganwalsh.fox.Expression.CasePattern;
+import dev.morganwalsh.fox.Expression.ControlFlow;
 import dev.morganwalsh.fox.Expression.Function;
 import dev.morganwalsh.fox.Expression.Grouping;
 import dev.morganwalsh.fox.Expression.Import;
@@ -25,6 +26,7 @@ import dev.morganwalsh.fox.Expression.Ternary;
 import dev.morganwalsh.fox.Expression.Unary;
 import dev.morganwalsh.fox.Expression.Var;
 import dev.morganwalsh.fox.Expression.Variable;
+import dev.morganwalsh.fox.Expression.While;
 
 public class Resolver implements Expression.Visitor<Void> {
 
@@ -211,6 +213,10 @@ public class Resolver implements Expression.Visitor<Void> {
 
 	@Override
 	public Void visitFunctionExpression(Function expression) {
+		if (expression.identifier != null) {
+			declare(expression.identifier);
+			define(expression.identifier);
+		}
 		resolveFunction(expression, FunctionType.FUNCTION);
 		return null;
 	}
@@ -258,6 +264,8 @@ public class Resolver implements Expression.Visitor<Void> {
 	@Override
 	public Void visitArrayCallExpression(ArrayCall expression) {
 		resolve(expression.callee);
+		resolve(expression.index);
+		if (expression.upperBound != null) resolve(expression.upperBound);
 		return null;
 	}
 
@@ -285,6 +293,19 @@ public class Resolver implements Expression.Visitor<Void> {
 		if (expression.right != null) {
 			resolve(expression.right);
 		}
+		return null;
+	}
+
+	@Override
+	public Void visitWhileExpression(While expression) {
+		if (expression.condition != null) resolve(expression.condition);
+		resolve(expression.body);
+		return null;
+	}
+
+	@Override
+	public Void visitControlFlowExpression(ControlFlow expression) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 

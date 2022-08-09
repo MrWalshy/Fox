@@ -33,20 +33,20 @@ defun(fibonacci, (n) -> {
 
 // print(timeToRun)
 
-var(weather, "sunny")
+//var(weather, "sunny")
 
-match weather {
-  "sunny" => print("Wear suncream\n")
-  _       => print("Pack a brolly\n")
-}
+//match weather {
+//  "sunny" => print("Wear suncream\n")
+//  _       => print("Pack a brolly\n")
+//}
 
-var(myArr, [1,2,3])
-var(length, len(myArr))
-print(length)
-set(myArr, 0, 22)
-var(myVariedArr, [1, "Hello", true, null])
-print(myVariedArr[3])
-print("\n\n")
+//var(myArr, [1,2,3])
+//var(length, len(myArr))
+//print(length)
+//set(myArr, 0, 22)
+//var(myVariedArr, [1, "Hello", true, null])
+//print(myVariedArr[3])
+//print("\n\n")
 
 var(select, '(in) -> match in {
   "Play" => "3 + 3"
@@ -55,4 +55,17 @@ var(select, '(in) -> match in {
 })
 
 //print(eval(select(input(">"))))
-print("Hello\t\n\nWorld")
+//print("Hello\t\n\nWorld")
+
+var(i, 1)
+
+while(i <= 10, {
+  print(i + "\n")
+  assign(i, i+1)
+})
+
+while({
+  print(i + "\n")
+  assign(i, i+1)
+  i == 400000 ? break() : i
+})

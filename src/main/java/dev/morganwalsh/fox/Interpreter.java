@@ -18,6 +18,7 @@ import dev.morganwalsh.fox.Expression.Block;
 import dev.morganwalsh.fox.Expression.Call;
 import dev.morganwalsh.fox.Expression.Case;
 import dev.morganwalsh.fox.Expression.CasePattern;
+import dev.morganwalsh.fox.Expression.ControlFlow;
 import dev.morganwalsh.fox.Expression.Function;
 import dev.morganwalsh.fox.Expression.Grouping;
 import dev.morganwalsh.fox.Expression.Import;
@@ -28,6 +29,7 @@ import dev.morganwalsh.fox.Expression.Ternary;
 import dev.morganwalsh.fox.Expression.Unary;
 import dev.morganwalsh.fox.Expression.Var;
 import dev.morganwalsh.fox.Expression.Variable;
+import dev.morganwalsh.fox.Expression.While;
 import dev.morganwalsh.fox.native_functions.Clock;
 import dev.morganwalsh.fox.native_functions.Evaluate;
 import dev.morganwalsh.fox.native_functions.Length;
@@ -78,6 +80,7 @@ public class Interpreter implements Expression.Visitor<Object> {
 		globals.define("charToStr", new CharacterToString());
 		globals.define("set", new SetMember());
 		globals.define("merge", new Merge());
+		globals.define("Array", new dev.morganwalsh.fox.native_functions.array.Array());
 	}
 
 	String interpret(List<Expression> expressions) {
@@ -217,14 +220,25 @@ public class Interpreter implements Expression.Visitor<Object> {
 			throw new RuntimeError(expression.closingBracket, "Cannot access an empty array.");
 		}
 		
-		int index = ((Double) expression.index.literal).intValue();
+		Object indexExpression = interpret(expression.index);
+		if (!(indexExpression instanceof Double)) {
+			throw new RuntimeError(expression.closingBracket, "Index expression didn't result in a valid index value: '" + indexExpression +  "'.");
+		}
+		int index = ((Double) indexExpression).intValue();
+		
 		// index is too big or index is too small
 		if (arr.length <= index || index < 0) {
 			throw new RuntimeError(expression.closingBracket, "Array index out of bounds '" + index + "'.");
 		}
 		
 		if (expression.upperBound != null) {
-			int upperBound = ((Double) expression.upperBound.literal).intValue();
+			Object upperBoundExpression = interpret(expression.upperBound);
+			
+			if (!(upperBoundExpression instanceof Double)) {
+				throw new RuntimeError(expression.closingBracket, "Upper bound expression didn't result in a valid index value: '" + indexExpression +  "'.");
+			}
+			
+			int upperBound = ((Double) upperBoundExpression).intValue();
 			if (arr.length <= upperBound || upperBound < 0) {
 				throw new RuntimeError(expression.closingBracket, "Array index out of bounds '" + index + "'.");
 			}
@@ -460,5 +474,31 @@ public class Interpreter implements Expression.Visitor<Object> {
 			this.right = right;
 			this.type = type;
 		}
+	}
+
+	@Override
+	public Object visitWhileExpression(While expression) {
+		Object output = null;
+		
+		try {
+			if (expression.condition != null) {
+				while (isTruthy(interpret(expression.condition))) {
+					output = interpret(expression.body);
+				}
+			} else {
+				while (true) {
+					output = interpret(expression.body);
+				}
+			}
+		} catch (RuntimeError error) {
+			if (error.token.type != TokenType.BREAK) throw error;
+		}
+		
+		return output;
+	}
+
+	@Override
+	public Object visitControlFlowExpression(ControlFlow expression) {
+		throw new RuntimeError(expression.keyword, "Break expressions are only valid in loop expressions.");
 	}
 }

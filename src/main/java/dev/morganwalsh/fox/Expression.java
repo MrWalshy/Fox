@@ -22,6 +22,8 @@ public abstract class Expression {
     R visitMatchExpression(Match expression);
     R visitCaseExpression(Case expression);
     R visitCasePatternExpression(CasePattern expression);
+    R visitWhileExpression(While expression);
+    R visitControlFlowExpression(ControlFlow expression);
   }
   static class Var extends Expression {
     Var(Token name, Expression initialiser) {
@@ -222,7 +224,7 @@ public abstract class Expression {
     final Token closingBracket;
   }
   static class ArrayCall extends Expression {
-    ArrayCall(Expression callee, Token index, Token upperBound, Token closingBracket) {
+    ArrayCall(Expression callee, Expression index, Expression upperBound, Token closingBracket) {
       this.callee = callee;
       this.index = index;
       this.upperBound = upperBound;
@@ -235,8 +237,8 @@ public abstract class Expression {
     }
 
     final Expression callee;
-    final Token index;
-    final Token upperBound;
+    final Expression index;
+    final Expression upperBound;
     final Token closingBracket;
   }
   static class Match extends Expression {
@@ -286,6 +288,32 @@ public abstract class Expression {
     final Expression left;
     final Token operator;
     final Expression right;
+  }
+  static class While extends Expression {
+    While(Expression condition, Expression body) {
+      this.condition = condition;
+      this.body = body;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitWhileExpression(this);
+    }
+
+    final Expression condition;
+    final Expression body;
+  }
+  static class ControlFlow extends Expression {
+    ControlFlow(Token keyword) {
+      this.keyword = keyword;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitControlFlowExpression(this);
+    }
+
+    final Token keyword;
   }
 
   abstract <R> R accept(Visitor<R> visitor);

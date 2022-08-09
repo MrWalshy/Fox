@@ -16,10 +16,12 @@ public class Parser {
 	private final List<Token> tokens;
 
 	private int current;
+	private int loopDepth;
 
 	public Parser(List<Token> tokens) {
 		this.tokens = tokens;
 		current = 0;
+		loopDepth = 0;
 	}
 
 	public List<Expression> parse() {
@@ -112,10 +114,38 @@ public class Parser {
 			return assign();
 		if (match(MATCH))
 			return matchExpression();
+		if (match(WHILE))
+			return whileLoop();
+		if (match(BREAK))
+			return breakExpression();
 		return ternaryExpression();
 //		} catch (ParseError error) {
 //			return null;
 //		}
+	}
+
+	private Expression breakExpression() {
+		Token previous = previous();
+		consume(LEFT_PAREN, "Expected '(' after break.");
+		consume(RIGHT_PAREN, "Expected ')' to complete call to break.");
+		if (loopDepth < 1) error(previous, "Can only use 'break' in a loop expression.");
+		return new Expression.ControlFlow(previous);
+		
+	}
+
+	private Expression whileLoop() {
+		consume(LEFT_PAREN, "Expected a '(' after 'while'");
+		loopDepth++;
+		Expression condition = expression();
+		Expression body = null;
+		
+		if (match(COMMA)) {
+			body = expression();
+		}
+		loopDepth--;
+		consume(RIGHT_PAREN, "Expected ')' after while loop body.");
+		return body == null ? new Expression.While(null, condition)
+				: new Expression.While(condition, body);
 	}
 
 	private Expression importExpression() {
@@ -418,11 +448,11 @@ public class Parser {
 	}
 
 	private Expression finishArrayCall(Expression expression) {
-		Token index = consume(NUMBER, "Expected an index or range of indexes.");
-		Token upperBound = null;
+		Expression index = expression();
+		Expression upperBound = null;
 
 		if (match(COMMA)) {
-			upperBound = consume(NUMBER, "Expected an index specifying the upper bound.");
+			upperBound = expression();
 		}
 		Token closingBracket = consume(RIGHT_BRACKET, "Expected a ']' to close the array call.");
 		return new Expression.ArrayCall(expression, index, upperBound, closingBracket);

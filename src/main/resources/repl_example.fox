@@ -1,0 +1,31 @@
+defun(println, (value) -> print(value + "\n"))
+defun(addTo, (arr, value) -> merge(arr, [value]))
+defun(printAll, (arr) -> {
+  var(i, 0)
+  
+  while(i < len(arr), {
+    println(arr[i])
+    assign(i, i + 1)
+  })
+})
+
+var(header, "##########
+#  Menu  #
+##########")
+var(items, "[1] Add a note
+[2] Read notes
+[3] Exit")
+
+var(notes, [])
+
+while({
+  println(header)
+  println(items)
+  var(in, input("> "))
+  match in {
+    "1" => assign(notes, addTo(notes, input("Note: ")))
+    "2" => printAll(notes)
+    "3" => break()
+    _   => println("Invalid input.")
+  }
+})
