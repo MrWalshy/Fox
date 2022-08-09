@@ -8,11 +8,14 @@ import dev.morganwalsh.fox.Expression.Assign;
 import dev.morganwalsh.fox.Expression.Binary;
 import dev.morganwalsh.fox.Expression.Block;
 import dev.morganwalsh.fox.Expression.Call;
+import dev.morganwalsh.fox.Expression.Case;
+import dev.morganwalsh.fox.Expression.CasePattern;
 import dev.morganwalsh.fox.Expression.Function;
 import dev.morganwalsh.fox.Expression.Grouping;
 import dev.morganwalsh.fox.Expression.Import;
 import dev.morganwalsh.fox.Expression.Literal;
 import dev.morganwalsh.fox.Expression.Logical;
+import dev.morganwalsh.fox.Expression.Match;
 import dev.morganwalsh.fox.Expression.Ternary;
 import dev.morganwalsh.fox.Expression.Unary;
 import dev.morganwalsh.fox.Expression.Var;
@@ -168,6 +171,24 @@ public class AstPrinter implements Expression.Visitor<String> {
 
 	@Override
 	public String visitArrayCallExpression(ArrayCall expression) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visitMatchExpression(Match expression) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visitCaseExpression(Case expression) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visitCasePatternExpression(CasePattern expression) {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -5,14 +5,18 @@ import static dev.morganwalsh.fox.TokenType.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import dev.morganwalsh.fox.Expression.Case;
+import dev.morganwalsh.fox.Expression.CasePattern;
+
 public class Parser {
 
-	private static class ParseError extends RuntimeException {}
-	
+	private static class ParseError extends RuntimeException {
+	}
+
 	private final List<Token> tokens;
-	
+
 	private int current;
-		
+
 	public Parser(List<Token> tokens) {
 		this.tokens = tokens;
 		current = 0;
@@ -20,49 +24,57 @@ public class Parser {
 
 	public List<Expression> parse() {
 		List<Expression> expressions = new ArrayList<>();
-		
-		while (!isAtEnd()) expressions.add(expression());
+
+		while (!isAtEnd())
+			expressions.add(expression());
 		return expressions;
 	}
 
 	/**
 	 * Returns true if the current token to be consumed is the end of file token.
+	 * 
 	 * @return
 	 */
 	private boolean isAtEnd() {
 		return peek().type == EOF;
 	}
-	
+
 	private Token peek() {
 		return tokens.get(current);
 	}
-	
+
 	private Token advance() {
-		if (!isAtEnd()) current++;
+		if (!isAtEnd())
+			current++;
 		return previous();
 	}
 
 	private Token previous() {
-		if (current == 0) return null;
+		if (current == 0)
+			return null;
 		return tokens.get(current - 1);
 	}
-	
+
 	private boolean check(TokenType type) {
-		if (isAtEnd()) return false;
+		if (isAtEnd())
+			return false;
 		return peek().type == type;
 	}
-	
+
 	private boolean checkTwoAhead(TokenType type) {
-		if (isAtEnd()) return false;
+		if (isAtEnd())
+			return false;
 		return tokens.get(current + 2).type == type;
 	}
-	
+
 	private boolean checkAhead(TokenType type, int num) {
-		if (isAtEnd()) return false;
-		if (current + num >= tokens.size()) return false;
+		if (isAtEnd())
+			return false;
+		if (current + num >= tokens.size())
+			return false;
 		return tokens.get(current + num).type == type;
 	}
-	
+
 	private boolean match(TokenType... types) {
 		for (TokenType type : types) {
 			// checks if the current token has the given type
@@ -73,9 +85,10 @@ public class Parser {
 		}
 		return false;
 	}
-	
+
 	private Token consume(TokenType type, String message) throws ParseError {
-		if (check(type)) return advance();
+		if (check(type))
+			return advance();
 		throw error(peek(), message);
 	}
 
@@ -87,15 +100,19 @@ public class Parser {
 	private Expression expression() {
 //		try {
 		// let it crash out for now, no synchronisation after error yet
-			if (check(DEFUN) && checkTwoAhead(IDENTIFIER)) {
-				consume(DEFUN, null);
-				return function("function");
-			}
-			if (match(IMPORT)) return importExpression();
-			if (match(VAR)) return var();
-			if (match(ASSIGN)) return assign();
-//			if (match(LEFT_CURLY)) return block();
-			return ternaryExpression();
+		if (check(DEFUN) && checkTwoAhead(IDENTIFIER)) {
+			consume(DEFUN, null);
+			return function("function");
+		}
+		if (match(IMPORT))
+			return importExpression();
+		if (match(VAR))
+			return var();
+		if (match(ASSIGN))
+			return assign();
+		if (match(MATCH))
+			return matchExpression();
+		return ternaryExpression();
 //		} catch (ParseError error) {
 //			return null;
 //		}
@@ -112,27 +129,69 @@ public class Parser {
 		Expression expression = expression();
 		List<Expression> expressions = new ArrayList<>();
 		expressions.add(expression);
-		
+
 //		if (check(COMMA)) {
-			while (!check(RIGHT_CURLY) && !isAtEnd()) {
+		while (!check(RIGHT_CURLY) && !isAtEnd()) {
 //				consume(COMMA, "Expect ',' after expression in expression block.");
-				expressions.add(expression());
-			}
+			expressions.add(expression());
+		}
 //		} 
 		consume(RIGHT_CURLY, "Expect '}' after expression block.");
 		expression = new Expression.Block(expressions);
+		return expression;
+	}
+	
+	private Expression matchExpression() {
+		Expression valueUnderTest = expression();
+		Token leftCurly = consume(LEFT_CURLY, "Expected '{' after match value.");
+		List<Expression.Case> cases = new ArrayList<>();
+
+		while (!check(RIGHT_CURLY) && !isAtEnd()) {
+			cases.add(matchCase());
+		}
+		if (cases.size() < 1)
+			throw error(leftCurly, "Match expression cannot contain 0 cases.");
+		consume(RIGHT_CURLY, "Expected a '}' to close match expression.");
+
+		return new Expression.Match(leftCurly, valueUnderTest, cases);
+	}
+
+	private Case matchCase() {
+		Expression condition = null;
+		condition = casePattern();
+		Token caseArrow = consume(FAT_ARROW, "Expected '=>' between case expression and case body.");
+		Expression body = expression();
+		return new Expression.Case(caseArrow, condition, body);
+	}
+	
+	private Expression casePattern() {
+		Expression expression = null;
+		
+		if (match(LEFT_PAREN)) {
+			expression = expression();
+			
+			if (!match(PIPE)) error(previous(), "Invalid case pattern supplied.");
+			
+			do {
+				Token operator = previous();
+				Expression right = expression();
+				expression = new Expression.CasePattern(expression, operator, right);
+			} while (match(PIPE));
+			consume(RIGHT_PAREN, "Expected ')' to close case pattern.");
+		} else expression = expression();
+		
 		return expression;
 	}
 
 	private Expression function(String kind) {
 		consume(LEFT_PAREN, "Expected '(' after " + kind + " declaration call.");
 		Token identifier = null;
-		
+
 		if (kind.equals("function")) {
 			identifier = consume(IDENTIFIER, "Expected identifier string as first argument to defun call.");
 			consume(COMMA, "Expect ',' after function identifier.");
-		} 
-		
+		}
+
 		// arrow function style definition starts here for the parameters and body
 		// of the actual function
 		if (kind.equals("function")) {
@@ -147,17 +206,17 @@ public class Parser {
 		}
 		consume(RIGHT_PAREN, "Expect ')' after function parameter list.");
 		consume(ARROW, "Expected an '->' after function parameter list");
-		
+
 		Expression body = getBody();
-		
+
 		if (kind.equals("function")) {
 			// close the call to defun, not necessary for anonymous function
 			consume(RIGHT_PAREN, "Expected ')' to close defun call.");
 		}
-		
+
 		return new Expression.Function(identifier, params, body);
 	}
-	
+
 	private Expression getBody() {
 //		if (match(LEFT_CURLY)) return block();
 //		else if (check(LEFT_PAREN)) {
@@ -181,42 +240,42 @@ public class Parser {
 	private Expression var() {
 		consume(LEFT_PAREN, "Expect '(' after var definition call.");
 		Token identifier = consume(IDENTIFIER, "Expect identifier as first argument to var definer.");
-		
+
 		Expression initialiser = null;
-		
+
 		if (check(COMMA)) {
 			consume(COMMA, null);
-			
+
 //			if (check(LEFT_CURLY)) {
 //				consume(LEFT_CURLY, "Expected start of expression block after identifier argument.");
 //				initialiser = block();
 //			} else initialiser = ternaryExpression();
 			initialiser = expression();
 		}
-		
+
 		consume(RIGHT_PAREN, "Expect ')' after var definition call arguments.");
 		return new Expression.Var(identifier, initialiser);
 	}
-	
+
 	private Expression assign() {
 		consume(LEFT_PAREN, "Expect '(' after var assign call.");
 		Token identifier = consume(IDENTIFIER, "Expect identifier as first argument to var assignment.");
 		consume(COMMA, "Expect ',' after identifer");
-		
+
 		Expression value = null;
 		if (check(LEFT_CURLY)) {
 			consume(LEFT_CURLY, "Expected start of expression block after identifier argument.");
 			value = block();
-		} else value = ternaryExpression();
-		
-		
+		} else
+			value = ternaryExpression();
+
 		consume(RIGHT_PAREN, "Expect ')' after var definition call arguments.");
 		return new Expression.Assign(identifier, value);
 	}
 
 	private Expression ternaryExpression() {
 		Expression expression = or();
-		
+
 		if (match(QUESTION_MARK)) {
 			Token operator = previous(); // use for making new token
 			Expression ifTrue = expression();
@@ -230,10 +289,11 @@ public class Parser {
 
 	private Expression or() {
 		Expression expression = and();
-		
+
 		while (match(OR)) {
 			Token operator = previous();
 			Expression right = and();
+//			if (inMatchExpression) expression = new Expression.CasePattern(expression, operator, right);
 			expression = new Expression.Logical(expression, operator, right);
 		}
 		return expression;
@@ -241,7 +301,7 @@ public class Parser {
 
 	private Expression and() {
 		Expression expression = equality();
-		
+
 		while (match(AND)) {
 			Token operator = previous();
 			Expression right = equality();
@@ -252,12 +312,13 @@ public class Parser {
 
 	/**
 	 * Grammar: equality -> comparison ( ( "!=" | "==" ) comparison )*
+	 * 
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	private Expression equality() throws ParseError {
 		Expression expr = comparison();
-		
+
 		while (match(BANG_EQUAL, EQUAL_EQUAL)) {
 			Token operator = previous();
 			Expression right = comparison();
@@ -268,12 +329,13 @@ public class Parser {
 
 	/**
 	 * Grammar: comparison -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+	 * 
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	private Expression comparison() throws ParseError {
 		Expression expr = term();
-		
+
 		while (match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
 			Token operator = previous();
 			Expression right = term();
@@ -284,12 +346,13 @@ public class Parser {
 
 	/**
 	 * Grammar: term -> factor ( ( "-" | "+" ) factor )* ;
+	 * 
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	private Expression term() throws ParseError {
 		Expression expr = factor();
-		
+
 		while (match(MINUS, PLUS)) {
 			Token operator = previous();
 			Expression right = factor();
@@ -300,12 +363,13 @@ public class Parser {
 
 	/**
 	 * Grammar: factor -> unary ( ( "/" | "*" ) unary )* ;
+	 * 
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	private Expression factor() throws ParseError {
 		Expression expr = unary();
-		
+
 		while (match(SLASH, STAR)) {
 			Token operator = previous();
 			Expression right = unary();
@@ -316,8 +380,9 @@ public class Parser {
 
 	/**
 	 * Grammar: unary -> ( "!" | "-" ) unary | primary ;
+	 * 
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	private Expression unary() throws ParseError {
 		if (match(BANG, MINUS)) {
@@ -327,22 +392,25 @@ public class Parser {
 		}
 		return call();
 	}
-	
+
 	private Expression call() {
 		Expression expression = primary();
-		
+
 		while (true) {
-			if (match(LEFT_PAREN)) expression = finishCall(expression);
-			else if (match(LEFT_BRACKET)) expression = finishArrayCall(expression);
-			else break;
+			if (match(LEFT_PAREN))
+				expression = finishCall(expression);
+			else if (match(LEFT_BRACKET))
+				expression = finishArrayCall(expression);
+			else
+				break;
 		}
 		return expression;
 	}
-	
+
 	private Expression finishArrayCall(Expression expression) {
 		Token index = consume(NUMBER, "Expected an index or range of indexes.");
 		Token upperBound = null;
-		
+
 		if (match(COMMA)) {
 			upperBound = consume(NUMBER, "Expected an index specifying the upper bound.");
 		}
@@ -355,35 +423,44 @@ public class Parser {
 	 */
 	private Expression finishCall(Expression expression) {
 		List<Expression> arguments = new ArrayList<>();
-		
+
 		if (!check(RIGHT_PAREN)) {
 			do {
 				arguments.add(expression()); // parse each argument
 			} while (match(COMMA));
 		}
-		
+
 		Token rightParen = consume(RIGHT_PAREN, "Expect ')' after argument list.");
 		return new Expression.Call(expression, rightParen, arguments);
 	}
 
 	/**
-	 * Grammar: primary -> NUMBER | STRING | "true" | "false" | "nil" 
-                         | "(" expression ")" ;
+	 * Grammar: primary -> NUMBER | STRING | "true" | "false" | "nil" | "("
+	 * expression ")" ;
+	 * 
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	private Expression primary() throws ParseError {
-		if (match(FALSE)) return new Expression.Literal(false);
-		if (match(TRUE)) return new Expression.Literal(true);
-		if (match(NULL)) return new Expression.Literal(null);
-		if (match(APOSTROPHE)) return function("anonymous");
-		if (match(LEFT_CURLY)) return block();
-		if (match(LEFT_BRACKET)) return array();
-		
-		if (match(NUMBER, STRING)) return new Expression.Literal(previous().literal);
-		
-		if (match(IDENTIFIER)) return new Expression.Variable(previous());
-		
+		if (match(FALSE))
+			return new Expression.Literal(false);
+		if (match(TRUE))
+			return new Expression.Literal(true);
+		if (match(NULL))
+			return new Expression.Literal(null);
+		if (match(APOSTROPHE))
+			return function("anonymous");
+		if (match(LEFT_CURLY))
+			return block();
+		if (match(LEFT_BRACKET))
+			return array();
+
+		if (match(NUMBER, STRING))
+			return new Expression.Literal(previous().literal);
+
+		if (match(IDENTIFIER))
+			return new Expression.Variable(previous());
+
 		if (match(LEFT_PAREN)) {
 			// look for arrow
 //			int lookahead = 1;
@@ -398,19 +475,21 @@ public class Parser {
 			consume(RIGHT_PAREN, "Expect ')' after expression");
 			return new Expression.Grouping(expr);
 		}
-		
+
 		// mustn't be a token that starts an expression to get here
 		throw error(peek(), "Expected an expression");
 	}
 
 	private Expression array() {
 		List<Expression> elements = new ArrayList<>();
-		
+
 		while (!check(RIGHT_BRACKET) && !isAtEnd()) {
 			elements.add(expression());
-			if (check(COMMA)) consume(COMMA, null);
+			if (check(COMMA))
+				consume(COMMA, null);
 		}
-		if (previous().type == COMMA) error(previous(), "Expected an expression after comma");
+		if (previous().type == COMMA)
+			error(previous(), "Expected an expression after comma");
 		Token rightBracket = consume(RIGHT_BRACKET, "Expect ']' after array declaration");
 		return new Expression.Array(elements, rightBracket);
 	}

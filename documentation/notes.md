@@ -66,7 +66,15 @@ expression              -> ternaryExpression
                          | functionDefiner
                          | varDefiner
                          | varAssignment 
-                         | import ;
+                         | import 
+                         | match ;
+
+match                   -> "match" expression "{"
+                              case+
+                           "}" ;
+case                    ->  ( expression |  casePattern ) ( "(" guard ")" )? => expression ;
+casePattern             ->  "(" ( expression "or" expression )+ ")" ;
+guard                   -> ( "where" | "if" ) expression ;
                          
 functionDefiner         -> "defun" "(" STRING "," function ")" ;
 function                -> "(" parameters? ")" "->" ( expressionBlock | ternaryExpression | function );

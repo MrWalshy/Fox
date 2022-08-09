@@ -13,11 +13,14 @@ import dev.morganwalsh.fox.Expression.Assign;
 import dev.morganwalsh.fox.Expression.Binary;
 import dev.morganwalsh.fox.Expression.Block;
 import dev.morganwalsh.fox.Expression.Call;
+import dev.morganwalsh.fox.Expression.Case;
+import dev.morganwalsh.fox.Expression.CasePattern;
 import dev.morganwalsh.fox.Expression.Function;
 import dev.morganwalsh.fox.Expression.Grouping;
 import dev.morganwalsh.fox.Expression.Import;
 import dev.morganwalsh.fox.Expression.Literal;
 import dev.morganwalsh.fox.Expression.Logical;
+import dev.morganwalsh.fox.Expression.Match;
 import dev.morganwalsh.fox.Expression.Ternary;
 import dev.morganwalsh.fox.Expression.Unary;
 import dev.morganwalsh.fox.Expression.Var;
@@ -255,6 +258,29 @@ public class Resolver implements Expression.Visitor<Void> {
 	@Override
 	public Void visitArrayCallExpression(ArrayCall expression) {
 		resolve(expression.callee);
+		return null;
+	}
+
+	@Override
+	public Void visitMatchExpression(Match expression) {
+		resolve(expression.value);
+		for (Expression caseExpression : expression.cases) {
+			resolve(caseExpression);
+		}
+		return null;
+	}
+
+	@Override
+	public Void visitCaseExpression(Case expression) {
+		resolve(expression.condition);
+		resolve(expression.body);
+		return null;
+	}
+
+	@Override
+	public Void visitCasePatternExpression(CasePattern expression) {
+		resolve(expression.left);
+		resolve(expression.right);
 		return null;
 	}
 

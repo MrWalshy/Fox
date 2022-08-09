@@ -16,11 +16,14 @@ import dev.morganwalsh.fox.Expression.Assign;
 import dev.morganwalsh.fox.Expression.Binary;
 import dev.morganwalsh.fox.Expression.Block;
 import dev.morganwalsh.fox.Expression.Call;
+import dev.morganwalsh.fox.Expression.Case;
+import dev.morganwalsh.fox.Expression.CasePattern;
 import dev.morganwalsh.fox.Expression.Function;
 import dev.morganwalsh.fox.Expression.Grouping;
 import dev.morganwalsh.fox.Expression.Import;
 import dev.morganwalsh.fox.Expression.Literal;
 import dev.morganwalsh.fox.Expression.Logical;
+import dev.morganwalsh.fox.Expression.Match;
 import dev.morganwalsh.fox.Expression.Ternary;
 import dev.morganwalsh.fox.Expression.Unary;
 import dev.morganwalsh.fox.Expression.Var;
@@ -390,5 +393,65 @@ public class Interpreter implements Expression.Visitor<Object> {
 		}
 		return output;
 	}
-	
+
+	@Override
+	public Object visitMatchExpression(Match expression) {
+		Object testable = interpret(expression.value);
+		
+		// check each case, if its condition result matches the passed in testable value
+		// then return the result of that 
+		for (Case caseExpression : expression.cases) {
+			// interpret the condition of the case
+			Object resultOfCondition = interpret(caseExpression.condition);
+			
+			// if not using a enhanced case pattern, directly check the cases result
+			if (!(resultOfCondition instanceof Pattern)) {
+				if (resultOfCondition.equals(testable)) return interpret(caseExpression.body);
+			} else {
+				// enhanced case pattern supplied
+				Pattern casePattern = (Pattern) resultOfCondition;
+				
+				switch (casePattern.type.type) {
+				case PIPE:
+					if (casePattern.left.equals(testable) 
+					 || interpret(casePattern.right).equals(testable)) {
+						return interpret(caseExpression.body);
+					}
+					break;
+				default:
+					throw new RuntimeError(casePattern.type, "Invalid case type supplied");
+				}
+			}
+		}
+		// no cases matched
+		return null;
+	}
+	/* match 6 {
+	 *   (5 or 6) => true
+	 * }
+	 * 
+	 */
+
+	@Override
+	public Object visitCaseExpression(Case expression) {
+		return interpret(expression.body);
+	}
+
+	@Override
+	public Object visitCasePatternExpression(CasePattern expression) {
+		Object left = interpret(expression.left);
+		return new Pattern(left, expression.right, expression.operator);
+	}
+
+	private class Pattern {
+		Object left;
+		Expression right;
+		Token type;
+		
+		public Pattern(Object left, Expression right, Token type) {
+			this.left = left;
+			this.right = right;
+			this.type = type;
+		}
+	}
 }

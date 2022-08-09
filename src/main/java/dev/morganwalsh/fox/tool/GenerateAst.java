@@ -31,7 +31,10 @@ public class GenerateAst {
 		      "Assign   : Token name, Expression assignment",
 		      "Import   : Token file",
 		      "Array    : List<Expression> elements, Token closingBracket",
-		      "ArrayCall : Expression callee, Token index, Token upperBound, Token closingBracket"
+		      "ArrayCall : Expression callee, Token index, Token upperBound, Token closingBracket",
+		      "Match    : Token matchToken, Expression value, List<Case> cases",
+		      "Case     : Token caseToken, Expression condition, Expression body",
+		      "CasePattern : Expression left, Token operator, Expression right"
 	    ));
 	}
 
