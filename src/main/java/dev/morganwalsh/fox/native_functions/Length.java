@@ -14,6 +14,8 @@ public class Length implements FoxCallable {
 		Object arg = arguments.get(0);
 		if (arg instanceof String) {
 			return ((double) ((String) arg).length());
+		} else if (arg instanceof Object[]) {
+			return ((Object[]) arg).length;
 		}
 		throw new RuntimeError(closingParenthesis, "'" + arguments.get(0).toString() + "' was not a string. Can only retrieve length of strings.");
 	}
