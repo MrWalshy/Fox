@@ -29,6 +29,20 @@ defun(fibonacci, (n) -> {
 })
 
 // approx 9.1 seconds on i7 10th gen, 5.11 seconds on i5 11th gen
-var(timeToRun, time('() -> print(fibonacci(35) + "\n")))
+// var(timeToRun, time('() -> print(fibonacci(35) + "\n")))
 
-print(timeToRun)
+// print(timeToRun)
+
+var(weather, "sunny")
+
+match weather {
+  "sunny" => print("Wear suncream\n")
+  _       => print("Pack a brolly\n")
+}
+
+var(myArr, [1,2,3])
+var(length, len(myArr))
+print(length)
+set(myArr, 0, 22)
+var(myVariedArr, [1, "Hello", true, null])
+print(myVariedArr[3])
