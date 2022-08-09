@@ -10,7 +10,7 @@ public class Print implements FoxCallable {
 
 	@Override
 	public Object call(Interpreter interpreter, List<Object> arguments, Token closingParenthesis) {
-		String arg = arguments.get(0).toString();
+		Object arg = arguments.get(0);
 		System.out.print(arg);
 		return arg;
 	}
