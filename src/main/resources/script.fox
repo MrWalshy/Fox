@@ -28,7 +28,7 @@ defun(fibonacci, (n) -> {
   n <= 1 ? n : fibonacci(n - 2) + fibonacci(n - 1)
 })
 
-// approx 9.1 seconds
-var(timeToRun, time(defun(() -> fibonacci(35))))
+// approx 9.1 seconds on i7 10th gen, 5.11 seconds on i5 11th gen
+var(timeToRun, time('() -> print(fibonacci(35) + "\n")))
 
 print(timeToRun)
