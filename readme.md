@@ -72,6 +72,18 @@ Strings can also be concatenated together to form a new string:
 "Hello " + "World"
 ```
 
+##### Escape sequences
+
+| Sequence | Description |
+| -------- | ----------- |
+| `\t`     | Inserts a tab |
+| `\n`     | Newline character |
+| `\\`     | Insert a backslash into the text |
+| `\"`     | Escapes a quote |
+| `\b`     | Backspace |
+| `\r`     | Carriage return |
+| `\f`     | Form feed |
+
 #### boolean
 
 A boolean is a truthy or falsey value. In Fox, `null` and `\0` are considered falsey, everything else is truthy.
@@ -297,6 +309,24 @@ match weather {
 This would print `Wear suncream`, it would also return that value as the built-in `print` function returns the value it prints.
 
 - The default case is optional
+
+An interesting use case for match expressions is for input, for example:
+
+```
+var(select, '(in) -> match in {
+  "Play" => "3 + 3"
+  "Exit" => "\"Good\\\"bye\""
+  _      => "\"Invalid input\""
+})
+
+print(eval(select(input(">"))))
+```
+
+This looks very much like a REPL, just without the L :D
+
+- the `eval` has been thrown in here just to show that you can evaluate code that is in a string in the enclosing scope.
+
+This program demonstates a variable called `select` that has been bound to an anonymous function. The anonymous function accepts one parameter representing the input and has a match expression for its body, the value from the matching case is returned.
 
 #### Enhanced matching
 
