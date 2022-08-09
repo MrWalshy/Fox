@@ -67,7 +67,10 @@ expression              -> ternaryExpression
                          | varDefiner
                          | varAssignment 
                          | import 
-                         | match ;
+                         | match 
+                         | loop ;
+
+loop                    -> "loop" "(" ( expression )? "," expression ")" ;
 
 match                   -> "match" expression "{"
                               case+
@@ -108,4 +111,12 @@ primary                 -> "true" | "false" | "null"
                          | "'" function ;
 
 ARRAY                   -> "[" expression ( "," expression )* "]" ;
+```
+
+```
+var(i, 1)
+loop(i <= 10, {
+  print(i)
+  assign(i, i+1)
+})
 ```

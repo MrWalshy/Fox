@@ -34,7 +34,8 @@ public class GenerateAst {
 		      "ArrayCall : Expression callee, Token index, Token upperBound, Token closingBracket",
 		      "Match    : Token matchToken, Expression value, List<Case> cases",
 		      "Case     : Token caseToken, Expression condition, Expression body",
-		      "CasePattern : Expression left, Token operator, Expression right"
+		      "CasePattern : Expression left, Token operator, Expression right",
+		      "Loop     : Expression condition, Expression body"
 	    ));
 	}
 
