@@ -23,6 +23,7 @@ public abstract class Expression {
     R visitCaseExpression(Case expression);
     R visitCasePatternExpression(CasePattern expression);
     R visitWhileExpression(While expression);
+    R visitControlFlowExpression(ControlFlow expression);
   }
   static class Var extends Expression {
     Var(Token name, Expression initialiser) {
@@ -301,6 +302,18 @@ public abstract class Expression {
 
     final Expression condition;
     final Expression body;
+  }
+  static class ControlFlow extends Expression {
+    ControlFlow(Token keyword) {
+      this.keyword = keyword;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitControlFlowExpression(this);
+    }
+
+    final Token keyword;
   }
 
   abstract <R> R accept(Visitor<R> visitor);

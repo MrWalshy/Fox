@@ -18,6 +18,7 @@ import dev.morganwalsh.fox.Expression.Block;
 import dev.morganwalsh.fox.Expression.Call;
 import dev.morganwalsh.fox.Expression.Case;
 import dev.morganwalsh.fox.Expression.CasePattern;
+import dev.morganwalsh.fox.Expression.ControlFlow;
 import dev.morganwalsh.fox.Expression.Function;
 import dev.morganwalsh.fox.Expression.Grouping;
 import dev.morganwalsh.fox.Expression.Import;
@@ -467,16 +468,25 @@ public class Interpreter implements Expression.Visitor<Object> {
 	public Object visitWhileExpression(While expression) {
 		Object output = null;
 		
-		if (expression.condition != null) {
-			while (isTruthy(interpret(expression.condition))) {
-				output = interpret(expression.body);
+		try {
+			if (expression.condition != null) {
+				while (isTruthy(interpret(expression.condition))) {
+					output = interpret(expression.body);
+				}
+			} else {
+				while (true) {
+					output = interpret(expression.body);
+				}
 			}
-		} else {
-			while (true) {
-				output = interpret(expression.body);
-			}
+		} catch (RuntimeError error) {
+			if (error.token.type != TokenType.BREAK) throw error;
 		}
 		
 		return output;
+	}
+
+	@Override
+	public Object visitControlFlowExpression(ControlFlow expression) {
+		throw new RuntimeError(expression.keyword, "Break expressions are only valid in loop expressions.");
 	}
 }

@@ -35,7 +35,8 @@ public class GenerateAst {
 		      "Match    : Token matchToken, Expression value, List<Case> cases",
 		      "Case     : Token caseToken, Expression condition, Expression body",
 		      "CasePattern : Expression left, Token operator, Expression right",
-		      "While    : Expression condition, Expression body"
+		      "While    : Expression condition, Expression body",
+		      "ControlFlow : Token keyword"
 	    ));
 	}
 

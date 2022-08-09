@@ -44,6 +44,7 @@ import static dev.morganwalsh.fox.TokenType.WHERE;
 import static dev.morganwalsh.fox.TokenType.MATCH;
 import static dev.morganwalsh.fox.TokenType.PIPE;
 import static dev.morganwalsh.fox.TokenType.UNDERSCORE;
+import static dev.morganwalsh.fox.TokenType.BREAK;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -71,8 +72,11 @@ public class Tokeniser {
 		keywords.put("var", VAR);
 		keywords.put("assign", ASSIGN);
 
-		// other
+		// loop related
 		keywords.put("while", WHILE);
+		keywords.put("break", BREAK);
+		
+		// other
 		keywords.put("import", IMPORT);
 //		keywords.put("where", WHERE); // not implemented
 		keywords.put("match", MATCH);

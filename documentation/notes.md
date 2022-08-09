@@ -68,7 +68,10 @@ expression              -> ternaryExpression
                          | varAssignment 
                          | import 
                          | match 
-                         | loop ;
+                         | loop 
+                         | control ;
+
+control                 -> "break" ;
 
 loop                    -> while ;
 

@@ -10,6 +10,7 @@ import dev.morganwalsh.fox.Expression.Block;
 import dev.morganwalsh.fox.Expression.Call;
 import dev.morganwalsh.fox.Expression.Case;
 import dev.morganwalsh.fox.Expression.CasePattern;
+import dev.morganwalsh.fox.Expression.ControlFlow;
 import dev.morganwalsh.fox.Expression.Function;
 import dev.morganwalsh.fox.Expression.Grouping;
 import dev.morganwalsh.fox.Expression.Import;
@@ -196,6 +197,12 @@ public class AstPrinter implements Expression.Visitor<String> {
 
 	@Override
 	public String visitWhileExpression(While expression) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visitControlFlowExpression(ControlFlow expression) {
 		// TODO Auto-generated method stub
 		return null;
 	}

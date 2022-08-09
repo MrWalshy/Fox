@@ -15,6 +15,7 @@ import dev.morganwalsh.fox.Expression.Block;
 import dev.morganwalsh.fox.Expression.Call;
 import dev.morganwalsh.fox.Expression.Case;
 import dev.morganwalsh.fox.Expression.CasePattern;
+import dev.morganwalsh.fox.Expression.ControlFlow;
 import dev.morganwalsh.fox.Expression.Function;
 import dev.morganwalsh.fox.Expression.Grouping;
 import dev.morganwalsh.fox.Expression.Import;
@@ -293,6 +294,12 @@ public class Resolver implements Expression.Visitor<Void> {
 	public Void visitWhileExpression(While expression) {
 		if (expression.condition != null) resolve(expression.condition);
 		resolve(expression.body);
+		return null;
+	}
+
+	@Override
+	public Void visitControlFlowExpression(ControlFlow expression) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 
