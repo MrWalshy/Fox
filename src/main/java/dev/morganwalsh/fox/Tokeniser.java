@@ -404,6 +404,9 @@ public class Tokeniser {
 				if (next == '"' || next == '\\') src = uptoSlash + afterSlash;
 				else if (next == 'n') src = uptoSlash + '\n' + afterEscapedCharacter;
 				else if (next == 't') src = uptoSlash + '\t' + afterEscapedCharacter;
+				else if (next == 'b') src = uptoSlash + '\b' + afterEscapedCharacter;
+				else if (next == 'r') src = uptoSlash + '\r' + afterEscapedCharacter;
+				else if (next == 'f') src = uptoSlash + '\f' + afterEscapedCharacter;
 				else Fox.error(line, "Invalid escape sequence in supplied string at character '" + currentCharacter + "'.");
 			}
 			// newline in the string, not an escape character typed by the user
