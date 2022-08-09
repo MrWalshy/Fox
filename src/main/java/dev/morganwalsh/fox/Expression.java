@@ -19,6 +19,9 @@ public abstract class Expression {
     R visitImportExpression(Import expression);
     R visitArrayExpression(Array expression);
     R visitArrayCallExpression(ArrayCall expression);
+    R visitMatchExpression(Match expression);
+    R visitCaseExpression(Case expression);
+    R visitCasePatternExpression(CasePattern expression);
   }
   static class Var extends Expression {
     Var(Token name, Expression initialiser) {
@@ -235,6 +238,54 @@ public abstract class Expression {
     final Token index;
     final Token upperBound;
     final Token closingBracket;
+  }
+  static class Match extends Expression {
+    Match(Token matchToken, Expression value, List<Case> cases) {
+      this.matchToken = matchToken;
+      this.value = value;
+      this.cases = cases;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitMatchExpression(this);
+    }
+
+    final Token matchToken;
+    final Expression value;
+    final List<Case> cases;
+  }
+  static class Case extends Expression {
+    Case(Token caseToken, Expression condition, Expression body) {
+      this.caseToken = caseToken;
+      this.condition = condition;
+      this.body = body;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitCaseExpression(this);
+    }
+
+    final Token caseToken;
+    final Expression condition;
+    final Expression body;
+  }
+  static class CasePattern extends Expression {
+    CasePattern(Expression left, Token operator, Expression right) {
+      this.left = left;
+      this.operator = operator;
+      this.right = right;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitCasePatternExpression(this);
+    }
+
+    final Expression left;
+    final Token operator;
+    final Expression right;
   }
 
   abstract <R> R accept(Visitor<R> visitor);
