@@ -11,7 +11,8 @@ public class GetCharacter implements FoxCallable {
 
 	@Override
 	public Object call(Interpreter interpreter, List<Object> arguments, Token closingParenthesis) {
-		return (double) Fox.sc.next().charAt(0);
+		double input = (double) Fox.sc.next().charAt(0);
+		return input;
 	}
 
 	@Override

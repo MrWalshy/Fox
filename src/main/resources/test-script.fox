@@ -1,0 +1,29 @@
+defun(counter, () -> {
+  var(count, 0)
+  '() -> assign(count, count+1)
+})
+
+var(counter1, counter())
+print(counter1() + "\n")
+print(counter1() + "")
+
+defun(time, (f) -> {
+  var(start, clock())
+  f()
+  var(end, clock())
+  "Took " + (end - start) + " seconds to run."
+})
+
+var(x, getch())
+print(charToStr(x))
+input("")
+
+var(in, input("> "))
+print(in)
+
+var(a, false ? {
+  true
+} : {
+  false
+})
+print(a)
