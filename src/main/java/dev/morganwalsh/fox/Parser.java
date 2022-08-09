@@ -112,10 +112,25 @@ public class Parser {
 			return assign();
 		if (match(MATCH))
 			return matchExpression();
+		if (match(WHILE))
+			return whileLoop();
 		return ternaryExpression();
 //		} catch (ParseError error) {
 //			return null;
 //		}
+	}
+
+	private Expression whileLoop() {
+		consume(LEFT_PAREN, "Expected a '(' after 'while'");
+		Expression condition = expression();
+		Expression body = null;
+		
+		if (match(COMMA)) {
+			body = expression();
+		}
+		consume(RIGHT_PAREN, "Expected ')' after while loop body.");
+		return body == null ? new Expression.While(null, condition)
+				: new Expression.While(condition, body);
 	}
 
 	private Expression importExpression() {

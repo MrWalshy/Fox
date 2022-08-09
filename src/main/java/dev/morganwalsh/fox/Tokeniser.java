@@ -74,8 +74,10 @@ public class Tokeniser {
 		// other
 		keywords.put("while", WHILE);
 		keywords.put("import", IMPORT);
-		keywords.put("where", WHERE);
+//		keywords.put("where", WHERE); // not implemented
 		keywords.put("match", MATCH);
+		
+		
 	}
 
 	/**

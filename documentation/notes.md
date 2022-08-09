@@ -70,7 +70,9 @@ expression              -> ternaryExpression
                          | match 
                          | loop ;
 
-loop                    -> "loop" "(" ( expression )? "," expression ")" ;
+loop                    -> while ;
+
+while                   -> "while" "(" ( expression )? "," expression ")" ;
 
 match                   -> "match" expression "{"
                               case+

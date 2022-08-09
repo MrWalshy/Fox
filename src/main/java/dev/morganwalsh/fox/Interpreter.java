@@ -28,6 +28,7 @@ import dev.morganwalsh.fox.Expression.Ternary;
 import dev.morganwalsh.fox.Expression.Unary;
 import dev.morganwalsh.fox.Expression.Var;
 import dev.morganwalsh.fox.Expression.Variable;
+import dev.morganwalsh.fox.Expression.While;
 import dev.morganwalsh.fox.native_functions.Clock;
 import dev.morganwalsh.fox.native_functions.Evaluate;
 import dev.morganwalsh.fox.native_functions.Length;
@@ -460,5 +461,22 @@ public class Interpreter implements Expression.Visitor<Object> {
 			this.right = right;
 			this.type = type;
 		}
+	}
+
+	@Override
+	public Object visitWhileExpression(While expression) {
+		Object output = null;
+		
+		if (expression.condition != null) {
+			while (isTruthy(interpret(expression.condition))) {
+				output = interpret(expression.body);
+			}
+		} else {
+			while (true) {
+				output = interpret(expression.body);
+			}
+		}
+		
+		return output;
 	}
 }

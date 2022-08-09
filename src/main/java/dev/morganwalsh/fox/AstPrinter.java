@@ -20,6 +20,7 @@ import dev.morganwalsh.fox.Expression.Ternary;
 import dev.morganwalsh.fox.Expression.Unary;
 import dev.morganwalsh.fox.Expression.Var;
 import dev.morganwalsh.fox.Expression.Variable;
+import dev.morganwalsh.fox.Expression.While;
 
 public class AstPrinter implements Expression.Visitor<String> {
 	
@@ -189,6 +190,12 @@ public class AstPrinter implements Expression.Visitor<String> {
 
 	@Override
 	public String visitCasePatternExpression(CasePattern expression) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visitWhileExpression(While expression) {
 		// TODO Auto-generated method stub
 		return null;
 	}

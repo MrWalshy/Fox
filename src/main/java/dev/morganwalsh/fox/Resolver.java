@@ -25,6 +25,7 @@ import dev.morganwalsh.fox.Expression.Ternary;
 import dev.morganwalsh.fox.Expression.Unary;
 import dev.morganwalsh.fox.Expression.Var;
 import dev.morganwalsh.fox.Expression.Variable;
+import dev.morganwalsh.fox.Expression.While;
 
 public class Resolver implements Expression.Visitor<Void> {
 
@@ -285,6 +286,13 @@ public class Resolver implements Expression.Visitor<Void> {
 		if (expression.right != null) {
 			resolve(expression.right);
 		}
+		return null;
+	}
+
+	@Override
+	public Void visitWhileExpression(While expression) {
+		if (expression.condition != null) resolve(expression.condition);
+		resolve(expression.body);
 		return null;
 	}
 

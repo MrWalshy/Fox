@@ -22,6 +22,7 @@ public abstract class Expression {
     R visitMatchExpression(Match expression);
     R visitCaseExpression(Case expression);
     R visitCasePatternExpression(CasePattern expression);
+    R visitWhileExpression(While expression);
   }
   static class Var extends Expression {
     Var(Token name, Expression initialiser) {
@@ -286,6 +287,20 @@ public abstract class Expression {
     final Expression left;
     final Token operator;
     final Expression right;
+  }
+  static class While extends Expression {
+    While(Expression condition, Expression body) {
+      this.condition = condition;
+      this.body = body;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitWhileExpression(this);
+    }
+
+    final Expression condition;
+    final Expression body;
   }
 
   abstract <R> R accept(Visitor<R> visitor);
