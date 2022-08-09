@@ -279,8 +279,12 @@ public class Resolver implements Expression.Visitor<Void> {
 
 	@Override
 	public Void visitCasePatternExpression(CasePattern expression) {
-		resolve(expression.left);
-		resolve(expression.right);
+		if (expression.left != null) {
+			resolve(expression.left);
+		}
+		if (expression.right != null) {
+			resolve(expression.right);
+		}
 		return null;
 	}
 

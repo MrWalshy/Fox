@@ -43,6 +43,7 @@ import static dev.morganwalsh.fox.TokenType.WHILE;
 import static dev.morganwalsh.fox.TokenType.WHERE;
 import static dev.morganwalsh.fox.TokenType.MATCH;
 import static dev.morganwalsh.fox.TokenType.PIPE;
+import static dev.morganwalsh.fox.TokenType.UNDERSCORE;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -134,6 +135,9 @@ public class Tokeniser {
 		char c = advance();
 
 		switch (c) {
+		case '_':
+			addToken(UNDERSCORE);
+			break;
 		case '|':
 			addToken(PIPE);
 			break;

@@ -167,9 +167,12 @@ public class Parser {
 	private Expression casePattern() {
 		Expression expression = null;
 		
+		// any custom case patterns
 		if (match(LEFT_PAREN)) {
+			// first expression of the pattern to match against
 			expression = expression();
 			
+			// separator
 			if (!match(PIPE)) error(previous(), "Invalid case pattern supplied.");
 			
 			do {
@@ -178,7 +181,14 @@ public class Parser {
 				expression = new Expression.CasePattern(expression, operator, right);
 			} while (match(PIPE));
 			consume(RIGHT_PAREN, "Expected ')' to close case pattern.");
-		} else expression = expression();
+		} else if (match(UNDERSCORE)) {
+			// default case
+			Token previous = previous();
+			expression = new Expression.CasePattern(null, previous, null);
+		} else {
+			// not a case pattern
+			expression = expression();
+		}
 		
 		return expression;
 	}

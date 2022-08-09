@@ -38,6 +38,8 @@ import dev.morganwalsh.fox.native_functions.io.GetCharacter;
 import dev.morganwalsh.fox.native_functions.io.Input;
 import dev.morganwalsh.fox.native_functions.io.Print;
 
+import static dev.morganwalsh.fox.TokenType.UNDERSCORE;
+
 public class Interpreter implements Expression.Visitor<Object> {
 	
 	private final Scanner sc = new Scanner(System.in);
@@ -406,7 +408,7 @@ public class Interpreter implements Expression.Visitor<Object> {
 			
 			// if not using a enhanced case pattern, directly check the cases result
 			if (!(resultOfCondition instanceof Pattern)) {
-				if (resultOfCondition.equals(testable)) return interpret(caseExpression.body);
+				if (resultOfCondition.equals(testable)) return interpret(caseExpression);
 			} else {
 				// enhanced case pattern supplied
 				Pattern casePattern = (Pattern) resultOfCondition;
@@ -418,6 +420,8 @@ public class Interpreter implements Expression.Visitor<Object> {
 						return interpret(caseExpression.body);
 					}
 					break;
+				case UNDERSCORE:
+					return interpret(caseExpression);
 				default:
 					throw new RuntimeError(casePattern.type, "Invalid case type supplied");
 				}
@@ -439,7 +443,10 @@ public class Interpreter implements Expression.Visitor<Object> {
 
 	@Override
 	public Object visitCasePatternExpression(CasePattern expression) {
-		Object left = interpret(expression.left);
+		Object left = null;
+		if (expression.operator.type != UNDERSCORE) {
+			left = interpret(expression.left);
+		}
 		return new Pattern(left, expression.right, expression.operator);
 	}
 
