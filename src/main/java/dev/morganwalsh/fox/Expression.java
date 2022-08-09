@@ -224,7 +224,7 @@ public abstract class Expression {
     final Token closingBracket;
   }
   static class ArrayCall extends Expression {
-    ArrayCall(Expression callee, Token index, Token upperBound, Token closingBracket) {
+    ArrayCall(Expression callee, Expression index, Expression upperBound, Token closingBracket) {
       this.callee = callee;
       this.index = index;
       this.upperBound = upperBound;
@@ -237,8 +237,8 @@ public abstract class Expression {
     }
 
     final Expression callee;
-    final Token index;
-    final Token upperBound;
+    final Expression index;
+    final Expression upperBound;
     final Token closingBracket;
   }
   static class Match extends Expression {

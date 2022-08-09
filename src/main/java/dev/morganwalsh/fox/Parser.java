@@ -448,11 +448,11 @@ public class Parser {
 	}
 
 	private Expression finishArrayCall(Expression expression) {
-		Token index = consume(NUMBER, "Expected an index or range of indexes.");
-		Token upperBound = null;
+		Expression index = expression();
+		Expression upperBound = null;
 
 		if (match(COMMA)) {
-			upperBound = consume(NUMBER, "Expected an index specifying the upper bound.");
+			upperBound = expression();
 		}
 		Token closingBracket = consume(RIGHT_BRACKET, "Expected a ']' to close the array call.");
 		return new Expression.ArrayCall(expression, index, upperBound, closingBracket);

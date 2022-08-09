@@ -80,6 +80,7 @@ public class Interpreter implements Expression.Visitor<Object> {
 		globals.define("charToStr", new CharacterToString());
 		globals.define("set", new SetMember());
 		globals.define("merge", new Merge());
+		globals.define("Array", new dev.morganwalsh.fox.native_functions.array.Array());
 	}
 
 	String interpret(List<Expression> expressions) {
@@ -219,14 +220,25 @@ public class Interpreter implements Expression.Visitor<Object> {
 			throw new RuntimeError(expression.closingBracket, "Cannot access an empty array.");
 		}
 		
-		int index = ((Double) expression.index.literal).intValue();
+		Object indexExpression = interpret(expression.index);
+		if (!(indexExpression instanceof Double)) {
+			throw new RuntimeError(expression.closingBracket, "Index expression didn't result in a valid index value: '" + indexExpression +  "'.");
+		}
+		int index = ((Double) indexExpression).intValue();
+		
 		// index is too big or index is too small
 		if (arr.length <= index || index < 0) {
 			throw new RuntimeError(expression.closingBracket, "Array index out of bounds '" + index + "'.");
 		}
 		
 		if (expression.upperBound != null) {
-			int upperBound = ((Double) expression.upperBound.literal).intValue();
+			Object upperBoundExpression = interpret(expression.upperBound);
+			
+			if (!(upperBoundExpression instanceof Double)) {
+				throw new RuntimeError(expression.closingBracket, "Upper bound expression didn't result in a valid index value: '" + indexExpression +  "'.");
+			}
+			
+			int upperBound = ((Double) upperBoundExpression).intValue();
 			if (arr.length <= upperBound || upperBound < 0) {
 				throw new RuntimeError(expression.closingBracket, "Array index out of bounds '" + index + "'.");
 			}

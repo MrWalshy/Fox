@@ -213,6 +213,10 @@ public class Resolver implements Expression.Visitor<Void> {
 
 	@Override
 	public Void visitFunctionExpression(Function expression) {
+		if (expression.identifier != null) {
+			declare(expression.identifier);
+			define(expression.identifier);
+		}
 		resolveFunction(expression, FunctionType.FUNCTION);
 		return null;
 	}
@@ -260,6 +264,8 @@ public class Resolver implements Expression.Visitor<Void> {
 	@Override
 	public Void visitArrayCallExpression(ArrayCall expression) {
 		resolve(expression.callee);
+		resolve(expression.index);
+		if (expression.upperBound != null) resolve(expression.upperBound);
 		return null;
 	}
 
