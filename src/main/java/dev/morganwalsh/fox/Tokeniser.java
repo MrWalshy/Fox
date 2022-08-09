@@ -392,10 +392,26 @@ public class Tokeniser {
 	private void string() {
 		// If lox supported it, escape characters in strings
 		// would be unescaped here
+		// - Fox supports some now :D
+		int currentCharacter = 1; // current char of the string
 		while (peek() != '"' && !isAtEnd()) {
+			if (peek() == '\\') {				
+				String uptoSlash = src.substring(0, current);
+				String afterSlash = src.substring(current + 1, src.length());
+				String afterEscapedCharacter = afterSlash.substring(1);
+				
+				char next = peekNext();
+				if (next == '"' || next == '\\') src = uptoSlash + afterSlash;
+				else if (next == 'n') src = uptoSlash + '\n' + afterEscapedCharacter;
+				else if (next == 't') src = uptoSlash + '\t' + afterEscapedCharacter;
+				else Fox.error(line, "Invalid escape sequence in supplied string at character '" + currentCharacter + "'.");
+			}
+			// newline in the string, not an escape character typed by the user
+			// but one detected from the source itself
 			if (peek() == '\n')
 				line++;
 			advance();
+			currentCharacter++;
 		}
 
 		if (isAtEnd()) {
@@ -408,7 +424,7 @@ public class Tokeniser {
 
 		// Trim the surrounding quotes.
 		String value = src.substring(start + 1, current - 1);
-		addToken(STRING, unescapeString(value));
+		addToken(STRING, value);
 	}
 
 	private void singleLineComment() {
