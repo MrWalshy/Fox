@@ -333,11 +333,23 @@ public class Parser {
 		
 		while (true) {
 			if (match(LEFT_PAREN)) expression = finishCall(expression);
+			else if (match(LEFT_BRACKET)) expression = finishArrayCall(expression);
 			else break;
 		}
 		return expression;
 	}
 	
+	private Expression finishArrayCall(Expression expression) {
+		Token index = consume(NUMBER, "Expected an index or range of indexes.");
+		Token upperBound = null;
+		
+		if (match(COMMA)) {
+			upperBound = consume(NUMBER, "Expected an index specifying the upper bound.");
+		}
+		Token closingBracket = consume(RIGHT_BRACKET, "Expected a ']' to close the array call.");
+		return new Expression.ArrayCall(expression, index, upperBound, closingBracket);
+	}
+
 	/**
 	 * Translation of the arguments rule
 	 */
@@ -366,6 +378,7 @@ public class Parser {
 		if (match(NULL)) return new Expression.Literal(null);
 		if (match(APOSTROPHE)) return function("anonymous");
 		if (match(LEFT_CURLY)) return block();
+		if (match(LEFT_BRACKET)) return array();
 		
 		if (match(NUMBER, STRING)) return new Expression.Literal(previous().literal);
 		
@@ -388,5 +401,17 @@ public class Parser {
 		
 		// mustn't be a token that starts an expression to get here
 		throw error(peek(), "Expected an expression");
+	}
+
+	private Expression array() {
+		List<Expression> elements = new ArrayList<>();
+		
+		while (!check(RIGHT_BRACKET) && !isAtEnd()) {
+			elements.add(expression());
+			if (check(COMMA)) consume(COMMA, null);
+		}
+		if (previous().type == COMMA) error(previous(), "Expected an expression after comma");
+		Token rightBracket = consume(RIGHT_BRACKET, "Expect ']' after array declaration");
+		return new Expression.Array(elements, rightBracket);
 	}
 }
