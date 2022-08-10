@@ -1,6 +1,9 @@
 package dev.morganwalsh.fox;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -9,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 import dev.morganwalsh.fox.Expression.Array;
 import dev.morganwalsh.fox.Expression.ArrayCall;
@@ -407,15 +411,15 @@ public class Interpreter implements Expression.Visitor<Object> {
 		try {
 			String libraryImport = getLibraryImport(expression);
 			Path filePath = null;
+			String src = null;
 			
 			if (libraryImport == null) {
 				filePath = Path.of(previousDirectory.toString(), "\\", expression.file.literal.toString());
-			} else {
-				filePath = Path.of(libraryImport);
-			}
+				// don't need to change for built-in libraries
+				Fox.currentExecutionDirectory = filePath.getParent();
+				src = Files.readString(filePath);
+			} else src = libraryImport;
 			
-			Fox.currentExecutionDirectory = filePath.getParent();
-			String src = Files.readString(filePath);
 			output = Fox.evaluate(src);
 		} catch (IOException e) {
 			throw new RuntimeError(expression.file, "Something went wrong trying to access '" + expression.file.literal + "'.");
@@ -426,11 +430,24 @@ public class Interpreter implements Expression.Visitor<Object> {
 	}
 
 	private String getLibraryImport(Import expression) {
+		//		URI uri = ClassLoader.getSystemResourceAsStream("io.fox");
 		Map<String, String> libraries = new HashMap<>(Map.of(
-				"arrays", "src/main/resources/libraries/arrays.fox",
-				"io", "src/main/resources/libraries/io.fox"
+				"arrays", "/libraries/arrays.fox",
+				"io", "/libraries/io.fox"
 		));
-		return libraries.get(expression.file.literal);
+		String path = libraries.get(expression.file.literal);
+		
+		if (path == null) return null;
+		
+		// load the file
+		try (InputStream is = getClass().getResourceAsStream(path)) {
+			var br = new BufferedReader(new InputStreamReader(is));
+			String content = br.lines().collect(Collectors.joining(System.lineSeparator()));
+			return content;
+		} catch (IOException e) {
+			Fox.error(expression.file, "Something went wrong resolving the import...");
+		}
+		return null;
 	}
 
 	@Override

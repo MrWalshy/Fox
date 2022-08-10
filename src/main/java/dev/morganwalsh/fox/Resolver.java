@@ -1,14 +1,17 @@
 package dev.morganwalsh.fox;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import dev.morganwalsh.fox.Expression.Array;
 import dev.morganwalsh.fox.Expression.ArrayCall;
@@ -262,28 +265,30 @@ public class Resolver implements Expression.Visitor<Void> {
 
 	@Override
 	public Void visitImportExpression(Import expression) {
-//		if (isLibraryImport(expression))
-//			return null;
-		// is it a library import?
-		String libraryImport = getLibraryImport(expression);
-
-		
-		String fileLiteral = expression.file.literal.toString();
 		// 1. Remember last directory (restore after finishing import resolution)
 		Path previousDirectory = Fox.currentExecutionDirectory;
-
-		// 2. Create a currentLocation variable to track what we are entering
-		Path fileToImport = libraryImport == null ?
-					Path.of(previousDirectory.toString(), "\\", fileLiteral)
-				:
-					Path.of(libraryImport);
-		Fox.currentExecutionDirectory = fileToImport.getParent();
-
-		// 3. Try resolve the files contents, will require tokenisation and
-		// parsing
+		
+		// is it a library import?
+		String libraryImport = getLibraryImport(expression);
+		
+		String fileLiteral = null;
+		String src = null;
+		Path toImport = null;
+		
+		if (libraryImport == null) {
+			fileLiteral = expression.file.literal.toString();
+			toImport = Path.of(previousDirectory.toString(), "\\", fileLiteral);
+			
+			// 2. only need to switch execution directories for user-defined files
+			// - libraries are on the classpath
+			Fox.currentExecutionDirectory = toImport.getParent();
+		}
+		
+		// 3. Try resolve the files contents (if any), will require tokenisation and parsing
 //		System.out.println("Resolving: " + fileToImport);
 		try {
-			String src = Files.readString(fileToImport);
+			if (libraryImport == null) src = Files.readString(toImport);
+			else src = libraryImport;
 			Tokeniser tokeniser = new Tokeniser(src);
 			List<Expression> ast = new Parser(tokeniser.scanTokens()).parse();
 			resolve(ast);
@@ -298,11 +303,24 @@ public class Resolver implements Expression.Visitor<Void> {
 	}
 
 	private String getLibraryImport(Import expression) {
+		//		URI uri = ClassLoader.getSystemResourceAsStream("io.fox");
 		Map<String, String> libraries = new HashMap<>(Map.of(
-				"arrays", "src/main/resources/libraries/arrays.fox",
-				"io", "src/main/resources/libraries/io.fox"
+				"arrays", "/libraries/arrays.fox",
+				"io", "/libraries/io.fox"
 		));
-		return libraries.get(expression.file.literal);
+		String path = libraries.get(expression.file.literal);
+		
+		if (path == null) return null;
+		
+		// load the file
+		try (InputStream is = getClass().getResourceAsStream(path)) {
+			var br = new BufferedReader(new InputStreamReader(is));
+			String content = br.lines().collect(Collectors.joining(System.lineSeparator()));
+			return content;
+		} catch (IOException e) {
+			Fox.error(expression.file, "Something went wrong resolving the import...");
+		}
+		return null;
 	}
 
 	@Override
