@@ -262,17 +262,21 @@ public class Resolver implements Expression.Visitor<Void> {
 
 	@Override
 	public Void visitImportExpression(Import expression) {
-		if (isLibraryImport(expression))
-			return null;
+//		if (isLibraryImport(expression))
+//			return null;
+		// is it a library import?
+		String libraryImport = getLibraryImport(expression);
 
-		// file resolution happens at runtime for
-		// eval calls
+		
 		String fileLiteral = expression.file.literal.toString();
 		// 1. Remember last directory (restore after finishing import resolution)
 		Path previousDirectory = Fox.currentExecutionDirectory;
 
 		// 2. Create a currentLocation variable to track what we are entering
-		Path fileToImport = Path.of(previousDirectory.toString(), "\\", fileLiteral);
+		Path fileToImport = libraryImport == null ?
+					Path.of(previousDirectory.toString(), "\\", fileLiteral)
+				:
+					Path.of(libraryImport);
 		Fox.currentExecutionDirectory = fileToImport.getParent();
 
 		// 3. Try resolve the files contents, will require tokenisation and
@@ -293,17 +297,12 @@ public class Resolver implements Expression.Visitor<Void> {
 		return null;
 	}
 
-	private boolean isLibraryImport(Import expression) {
-		String name = expression.file.literal.toString();
-		return isOneOf(name, "arrays", "io");
-	}
-
-	private boolean isOneOf(String name, String... args) {
-		for (String arg : args) {
-			if (name.equals(arg))
-				return true;
-		}
-		return false;
+	private String getLibraryImport(Import expression) {
+		Map<String, String> libraries = new HashMap<>(Map.of(
+				"arrays", "src/main/resources/libraries/arrays.fox",
+				"io", "src/main/resources/libraries/io.fox"
+		));
+		return libraries.get(expression.file.literal);
 	}
 
 	@Override

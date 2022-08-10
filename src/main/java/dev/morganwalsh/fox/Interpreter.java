@@ -413,7 +413,15 @@ public class Interpreter implements Expression.Visitor<Object> {
 		Object output = null;
 		Path previousDirectory = Fox.currentExecutionDirectory;
 		try {
-			Path filePath = Path.of(previousDirectory.toString(), "\\", expression.file.literal.toString());
+			String libraryImport = getLibraryImport(expression);
+			Path filePath = null;
+			
+			if (libraryImport == null) {
+				filePath = Path.of(previousDirectory.toString(), "\\", expression.file.literal.toString());
+			} else {
+				filePath = Path.of(libraryImport);
+			}
+			
 			Fox.currentExecutionDirectory = filePath.getParent();
 			String src = Files.readString(filePath);
 			output = Fox.evaluate(src);
@@ -423,6 +431,14 @@ public class Interpreter implements Expression.Visitor<Object> {
 			Fox.currentExecutionDirectory = previousDirectory;
 		}
 		return output;
+	}
+
+	private String getLibraryImport(Import expression) {
+		Map<String, String> libraries = new HashMap<>(Map.of(
+				"arrays", "src/main/resources/libraries/arrays.fox",
+				"io", "src/main/resources/libraries/io.fox"
+		));
+		return libraries.get(expression.file.literal);
 	}
 
 	@Override
