@@ -411,11 +411,16 @@ public class Interpreter implements Expression.Visitor<Object> {
 	@Override
 	public Object visitImportExpression(Import expression) {
 		Object output = null;
+		Path previousDirectory = Fox.currentExecutionDirectory;
 		try {
-			String src = Files.readString(Path.of(expression.file.literal.toString()));
+			Path filePath = Path.of(previousDirectory.toString(), "\\", expression.file.literal.toString());
+			Fox.currentExecutionDirectory = filePath.getParent();
+			String src = Files.readString(filePath);
 			output = Fox.evaluate(src);
 		} catch (IOException e) {
 			throw new RuntimeError(expression.file, "Something went wrong trying to access '" + expression.file.literal + "'.");
+		} finally {
+			Fox.currentExecutionDirectory = previousDirectory;
 		}
 		return output;
 	}
