@@ -60,6 +60,50 @@ This program offers an infinite loop, only exiting when the user types the strin
 
 - encapsulation
 
+## Requirements
+
+- Java 11+
+
+## Running a script
+
+From the releases section on GitHub, download the 0.1.1-alpha release (latest) JAR file of the Fox interpreter.
+
+Once downloaded, you may rename the JAR to your fancy. To start your application, a single script is supplied to the JAR as an argument:
+
+```
+java -jar .\fox-0.1.0-alpha-jar-with-dependencies.jar lisp.fox
+```
+
+Running the JAR without any arguments starts the REPL environment:
+
+```
+java -jar .\fox-0.1.0-alpha-jar-with-dependencies.jar 
+```
+
+Once in the REPL, you will be greeted by the prompt:
+
+```
+>
+```
+
+The prompt awaits your instruction.... Upon evaluating an expression, its result will be output to the console:
+
+```
+> var(x, 3)
+
+var(x, 3) ===> 3
+```
+
+The above tells us that the variable declaration resolved to `3`.
+
+If you type in a function identifier without parenthesis, the REPL will output the type:
+
+```
+> print
+
+print ===> <native fn>
+```
+
 ## Language reference
 
 ### Data types
@@ -218,6 +262,15 @@ A variable also cannot reference itself when being defined:
 {
   var(scoped, scoped) // runtime error
 }
+```
+
+#### Assignments
+
+To change the value of a variable, you can use `var` in the global scope or `assign` for all other scopes... `assign` takes two arguments, the variable to assign to and it's new value:
+
+```
+var(x, 30) // 30
+assign(x, 50) // 50
 ```
 
 ### Expressions
