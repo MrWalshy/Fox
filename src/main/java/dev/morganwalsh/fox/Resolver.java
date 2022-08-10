@@ -1,5 +1,6 @@
 package dev.morganwalsh.fox;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -95,7 +96,7 @@ public class Resolver implements Expression.Visitor<Void> {
 //		if (!matcher.find()) {
 //			Fox.error(name, "Variable name does not match expected format: [a-zA-Z_][a-zA-Z_0-9]*");
 //		}
-		
+
 		if (scopes.isEmpty())
 			return; // global
 
@@ -133,23 +134,23 @@ public class Resolver implements Expression.Visitor<Void> {
 		// if here is reached, variable is assumed to be global scope as
 		// all block scopes have been resolved, meaning we leave it unresolved
 	}
-	
+
 	private void resolveFunction(Function expression, FunctionType type) {
 		FunctionType enclosingFunctionType = currentFunctionType;
 		currentFunctionType = type;
-		
+
 		// create a scope
 		beginScope();
-		
+
 		// bind the parameters
 		for (Token param : expression.params) {
 			declare(param);
 			define(param);
 		}
-		
+
 		// resolve the body of the function
 		resolve(expression.body);
-		
+
 		endScope();
 		currentFunctionType = enclosingFunctionType;
 	}
@@ -157,11 +158,12 @@ public class Resolver implements Expression.Visitor<Void> {
 	@Override
 	public Void visitVarExpression(Var expression) {
 		declare(expression.name);
-		
+
 		if (expression.initialiser != null) {
 			resolve(expression.initialiser);
 //			resolveLocalVariable(expression, expression.name);
-		};
+		}
+		;
 		define(expression.name);
 		return null;
 	}
@@ -193,9 +195,10 @@ public class Resolver implements Expression.Visitor<Void> {
 	public Void visitCallExpression(Call expression) {
 		// resolve the identifier
 		resolve(expression.callee);
-		
+
 		// walk and resolve arg list
-		for (Expression arg : expression.arguments) resolve(arg);
+		for (Expression arg : expression.arguments)
+			resolve(arg);
 		return null;
 	}
 
@@ -259,12 +262,47 @@ public class Resolver implements Expression.Visitor<Void> {
 
 	@Override
 	public Void visitImportExpression(Import expression) {
-		// compile-time static check of whether the file exists or not would be good
-		// here, prevent run-time error of it not existing
-		if (!Files.exists(Path.of(expression.file.literal.toString()))) {
-			Fox.error(expression.file.line, "Cannot find file '" + expression.file.lexeme + "'.");
+//		if (isLibraryImport(expression))
+//			return null;
+		// is it a library import?
+		String libraryImport = getLibraryImport(expression);
+
+		
+		String fileLiteral = expression.file.literal.toString();
+		// 1. Remember last directory (restore after finishing import resolution)
+		Path previousDirectory = Fox.currentExecutionDirectory;
+
+		// 2. Create a currentLocation variable to track what we are entering
+		Path fileToImport = libraryImport == null ?
+					Path.of(previousDirectory.toString(), "\\", fileLiteral)
+				:
+					Path.of(libraryImport);
+		Fox.currentExecutionDirectory = fileToImport.getParent();
+
+		// 3. Try resolve the files contents, will require tokenisation and
+		// parsing
+//		System.out.println("Resolving: " + fileToImport);
+		try {
+			String src = Files.readString(fileToImport);
+			Tokeniser tokeniser = new Tokeniser(src);
+			List<Expression> ast = new Parser(tokeniser.scanTokens()).parse();
+			resolve(ast);
+		} catch (IOException e) {
+			Fox.error(expression.file, "Could not resolve import statement for '" + expression.file.literal + "'.");
+		} finally {
+			// 4. Restore the old directory after finishing resolution
+			Fox.currentExecutionDirectory = previousDirectory;
 		}
+
 		return null;
+	}
+
+	private String getLibraryImport(Import expression) {
+		Map<String, String> libraries = new HashMap<>(Map.of(
+				"arrays", "src/main/resources/libraries/arrays.fox",
+				"io", "src/main/resources/libraries/io.fox"
+		));
+		return libraries.get(expression.file.literal);
 	}
 
 	@Override
@@ -277,7 +315,8 @@ public class Resolver implements Expression.Visitor<Void> {
 	public Void visitArrayCallExpression(ArrayCall expression) {
 		resolve(expression.callee);
 		resolve(expression.index);
-		if (expression.upperBound != null) resolve(expression.upperBound);
+		if (expression.upperBound != null)
+			resolve(expression.upperBound);
 		return null;
 	}
 
@@ -310,7 +349,8 @@ public class Resolver implements Expression.Visitor<Void> {
 
 	@Override
 	public Void visitWhileExpression(While expression) {
-		if (expression.condition != null) resolve(expression.condition);
+		if (expression.condition != null)
+			resolve(expression.condition);
 		resolve(expression.body);
 		return null;
 	}

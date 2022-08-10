@@ -160,12 +160,6 @@ public class Interpreter implements Expression.Visitor<Object> {
 
 	@Override
 	public Object visitTernaryExpression(Ternary expression) {
-//		Object ifFalse = interpret(expression.ifFalse);
-//		Object ifTrue = interpret(expression.ifTrue);
-//		Object conditionResult = interpret(expression.condition);
-//		
-//		if (isTruthy(conditionResult)) return ifTrue;
-//		else return ifFalse;
 		// only eval the needed path to prevent infinite recursion
 		if (isTruthy(interpret(expression.condition))) return interpret(expression.ifTrue);
 		else return interpret(expression.ifFalse);
@@ -350,8 +344,6 @@ public class Interpreter implements Expression.Visitor<Object> {
 		return values.toArray();
 	}
 
-	
-
 	@Override
 	public Object visitVariableExpression(Variable expression) {
 		return lookupVariable(expression.name, expression);
@@ -411,13 +403,34 @@ public class Interpreter implements Expression.Visitor<Object> {
 	@Override
 	public Object visitImportExpression(Import expression) {
 		Object output = null;
+		Path previousDirectory = Fox.currentExecutionDirectory;
 		try {
-			String src = Files.readString(Path.of(expression.file.literal.toString()));
+			String libraryImport = getLibraryImport(expression);
+			Path filePath = null;
+			
+			if (libraryImport == null) {
+				filePath = Path.of(previousDirectory.toString(), "\\", expression.file.literal.toString());
+			} else {
+				filePath = Path.of(libraryImport);
+			}
+			
+			Fox.currentExecutionDirectory = filePath.getParent();
+			String src = Files.readString(filePath);
 			output = Fox.evaluate(src);
 		} catch (IOException e) {
 			throw new RuntimeError(expression.file, "Something went wrong trying to access '" + expression.file.literal + "'.");
+		} finally {
+			Fox.currentExecutionDirectory = previousDirectory;
 		}
 		return output;
+	}
+
+	private String getLibraryImport(Import expression) {
+		Map<String, String> libraries = new HashMap<>(Map.of(
+				"arrays", "src/main/resources/libraries/arrays.fox",
+				"io", "src/main/resources/libraries/io.fox"
+		));
+		return libraries.get(expression.file.literal);
 	}
 
 	@Override
@@ -454,11 +467,6 @@ public class Interpreter implements Expression.Visitor<Object> {
 		// no cases matched
 		return null;
 	}
-	/* match 6 {
-	 *   (5 or 6) => true
-	 * }
-	 * 
-	 */
 
 	@Override
 	public Object visitCaseExpression(Case expression) {

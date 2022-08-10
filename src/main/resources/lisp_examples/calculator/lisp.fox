@@ -1,9 +1,9 @@
-import("src/main/resources/libraries/io.fox")
-import("src/main/resources/libraries/arrays.fox")
-import("src/main/resources/lisp_examples/calculator/tokeniser.fox")
-import("src/main/resources/lisp_examples/calculator/parser.fox")
-import("src/main/resources/lisp_examples/calculator/environment.fox")
-import("src/main/resources/lisp_examples/calculator/interpreter.fox")
+import("io")
+import("arrays")
+import("./tokeniser.fox")
+import("./parser.fox")
+import("./environment.fox")
+import("./interpreter.fox")
 
 {
 	//var(tokens, tokenise(program))

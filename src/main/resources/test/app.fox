@@ -1,0 +1,5 @@
+//import("./utils.fox")
+
+//print(add(1,2))
+
+import("./utils/strUtility.fox")
