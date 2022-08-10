@@ -1,0 +1,42 @@
+/* 
+  Returns a new array with the first element
+  of the passed-in array removed.
+*/
+var(popFront, '(arr) -> {
+  match len(arr) {
+    1 => [] // return empty array
+    2 => [arr[1]] // return last element in array
+    _ => {
+      // last token
+      var(last, arr[len(arr) - 1])
+      var(afterCurrent, arr[1, len(arr) - 1])
+      merge(afterCurrent, [last])
+    }
+  }
+})
+
+/*
+ recursively prints an array
+*/
+defun(printArr, (arr) -> {
+  defun(recurse, (arr) -> {
+    var(i, 0)
+  
+    while(i < len(arr), {
+      typeOf(arr[i]) == "array" ? {
+        print("[")
+        recurse(arr[i])
+        print("]")
+      } : {
+        print(arr[i])
+      }
+      i + 1 < len(arr) ? print(", ") : null
+      assign(i, i+1)
+    })
+  })
+  print("[")
+  recurse(arr)
+  print("]")
+})
+
+defun(addTo, (arr, value) -> merge(arr, [value]))

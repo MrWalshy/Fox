@@ -1,0 +1,41 @@
+var(parseError, '(message) -> { println("Parse error: " + message) })
+
+// creates an abstract syntax tree
+var(parse, '(tokens) -> {
+
+  defun(innerParse, () -> {
+    len(tokens) == 0 ? parseError("Unexpected EOF") : {
+      // get current token
+      var(token, tokens[0])
+      
+      // remove front token
+      assign(tokens, popFront(tokens))
+      
+      match token {
+        "(" => {
+          var(nodes, [])
+          
+          while(tokens[0] != ")", {
+            assign(nodes, merge(nodes, [innerParse()]))
+          })
+          // remove the ')'
+          assign(tokens, popFront(tokens))
+          nodes
+        }
+        ")" => parseError("Unexpected ')'.")
+        _   => atom(token)
+      }
+    }
+  })
+  
+  innerParse()
+})
+
+// creates a node for the syntax tree
+defun(atom, (token) -> {
+  defun(node, (type, token) -> [type, token])
+
+  var(type, typeOf(token))
+  var(isNumber, type == "number")
+  node(isNumber ? "number" : "symbol", token)
+})

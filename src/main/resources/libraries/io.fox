@@ -1,0 +1,10 @@
+defun(println, (value) -> print(value + "\n"))
+
+defun(printAll, (arr) -> {
+  var(i, 0)
+  
+  while(i < len(arr), {
+    println(arr[i])
+    assign(i, i + 1)
+  })
+})

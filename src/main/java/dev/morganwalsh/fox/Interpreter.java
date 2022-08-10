@@ -33,12 +33,17 @@ import dev.morganwalsh.fox.Expression.While;
 import dev.morganwalsh.fox.native_functions.Clock;
 import dev.morganwalsh.fox.native_functions.Evaluate;
 import dev.morganwalsh.fox.native_functions.Length;
+import dev.morganwalsh.fox.native_functions.TypeOf;
 import dev.morganwalsh.fox.native_functions.array.Merge;
 import dev.morganwalsh.fox.native_functions.array.SetMember;
 import dev.morganwalsh.fox.native_functions.io.CharacterToString;
 import dev.morganwalsh.fox.native_functions.io.GetCharacter;
 import dev.morganwalsh.fox.native_functions.io.Input;
 import dev.morganwalsh.fox.native_functions.io.Print;
+import dev.morganwalsh.fox.native_functions.string.Replace;
+import dev.morganwalsh.fox.native_functions.string.Split;
+import dev.morganwalsh.fox.native_functions.string.Trim;
+import dev.morganwalsh.fox.native_functions.utils.Number;
 
 import static dev.morganwalsh.fox.TokenType.UNDERSCORE;
 
@@ -81,6 +86,11 @@ public class Interpreter implements Expression.Visitor<Object> {
 		globals.define("set", new SetMember());
 		globals.define("merge", new Merge());
 		globals.define("Array", new dev.morganwalsh.fox.native_functions.array.Array());
+		globals.define("split", new Split());
+		globals.define("replace", new Replace());
+		globals.define("trim", new Trim());
+		globals.define("typeOf", new TypeOf());
+		globals.define("Number", new Number());
 	}
 
 	String interpret(List<Expression> expressions) {

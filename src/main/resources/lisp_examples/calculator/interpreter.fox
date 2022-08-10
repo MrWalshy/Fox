@@ -1,0 +1,26 @@
+// evaluates a single ast expression
+defun(eval, (ast, env) -> {  
+  match ast[0] {
+    "symbol" => getSymbol(ast[1], env)
+    "number" => ast[1]     
+    _ => {
+      // evaluate a procedure call
+      var(procedureCall, eval(ast[0], env))
+      
+      // evaluate the args following the call
+      var(args, [])
+      
+      var(argIndex, 1)
+        
+      // while there are arguments left
+      while(argIndex < len(ast), {
+        var(arg, ast[argIndex])
+        var(evaluatedArg, eval(arg, env))
+        // evaluate each argument
+        assign(args, addTo(args, evaluatedArg))        
+        assign(argIndex, argIndex + 1)
+      })   
+      procedureCall(args)
+    }
+  } 
+})

@@ -1,0 +1,8 @@
+/* 
+  Creates an array of tokens with whitespace trimmed
+*/
+var(tokenise, '(str) -> {
+  var(output, replace(str, "\\(", " ( "))
+  assign(output, replace(output, "\\)", " ) "))
+  split(trim(output), "\\s+")
+})

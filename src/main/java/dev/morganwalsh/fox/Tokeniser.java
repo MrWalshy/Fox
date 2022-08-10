@@ -80,7 +80,7 @@ public class Tokeniser {
 		keywords.put("import", IMPORT);
 //		keywords.put("where", WHERE); // not implemented
 		keywords.put("match", MATCH);
-		
+		keywords.put("_", UNDERSCORE);
 		
 	}
 
@@ -141,9 +141,9 @@ public class Tokeniser {
 		char c = advance();
 
 		switch (c) {
-		case '_':
-			addToken(UNDERSCORE);
-			break;
+//		case '_':
+//			addToken(UNDERSCORE);
+//			break;
 		case '|':
 			addToken(PIPE);
 			break;

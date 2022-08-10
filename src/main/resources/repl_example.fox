@@ -18,7 +18,7 @@ var(items, "[1] Add a note
 
 var(notes, [])
 
-while({
+while(false, {
   println(header)
   println(items)
   var(in, input("> "))

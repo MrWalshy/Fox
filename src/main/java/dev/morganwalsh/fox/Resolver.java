@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import dev.morganwalsh.fox.Expression.Array;
 import dev.morganwalsh.fox.Expression.ArrayCall;
@@ -84,6 +86,16 @@ public class Resolver implements Expression.Visitor<Void> {
 	 * @param name
 	 */
 	private void declare(Token name) {
+		// name check
+		// - must start with a-z or A-Z or _
+		// - followed by any number of a-z, A-Z, _ or 0-9
+		// not necessary here as the tokeniser does a good job of handling this
+//		Pattern nameRegex = Pattern.compile("[a-zA-Z_][a-zA-Z_0-9]*");
+//		Matcher matcher = nameRegex.matcher(name.lexeme);
+//		if (!matcher.find()) {
+//			Fox.error(name, "Variable name does not match expected format: [a-zA-Z_][a-zA-Z_0-9]*");
+//		}
+		
 		if (scopes.isEmpty())
 			return; // global
 

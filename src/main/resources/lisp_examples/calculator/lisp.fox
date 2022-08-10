@@ -1,0 +1,21 @@
+import("src/main/resources/libraries/io.fox")
+import("src/main/resources/libraries/arrays.fox")
+import("src/main/resources/lisp_examples/calculator/tokeniser.fox")
+import("src/main/resources/lisp_examples/calculator/parser.fox")
+import("src/main/resources/lisp_examples/calculator/environment.fox")
+import("src/main/resources/lisp_examples/calculator/interpreter.fox")
+
+{
+	//var(tokens, tokenise(program))
+	//var(ast, parse(tokens))
+	//var(env, standardEnvironment(null))
+	//var(result, eval(ast, env))
+	
+	var(start, clock())
+	var(env, standardEnvironment(null))
+	var(program, "(+ (/ 1 2) (/ 3 4))")
+	var(result, eval(parse(tokenise(program)), env))
+	var(end, clock())
+	println(result)
+	println("Finished in '" + (end - start) + "' seconds.")
+}

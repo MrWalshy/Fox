@@ -1,0 +1,42 @@
+defun(mathOperation, (symbol, args) -> {
+  var(total, Number(args[0]))
+  var(i, 1)
+  
+  // println("=== " + symbol)
+  while(i < len(args), {
+    // println("Doing " + args[0] + symbol + args[i])
+    match symbol {
+      "+" => assign(total, total + Number(args[i]))
+      "-" => assign(total, total - Number(args[i]))
+      "/" => assign(total, total / Number(args[i]))
+      "*" => assign(total, total * Number(args[i]))
+    }
+    assign(i, i+1)
+  })
+  // println("The total of was: " + total)
+  total
+})
+
+defun(standardEnvironment, (addOns) -> {
+  var(builtIns, [
+    ["+", '(args) -> mathOperation("+", args)],
+    ["-", '(args) -> mathOperation("-", args)],
+    ["/", '(args) -> mathOperation("/", args)],
+    ["*", '(args) -> mathOperation("*", args)]
+  ])
+  addOns ? merge(builtIns, addOns) : builtIns
+})
+
+defun(getSymbol, (lexeme, env) -> {
+  var(i, 0)
+  var(symbol)
+    
+  while(i < len(env), {
+    env[i][0] == lexeme ? {
+      assign(symbol, env[i][1])
+      break()
+    } : null
+    assign(i, i+1)
+  })
+  symbol
+})
