@@ -296,7 +296,7 @@ The `import` expression is used to import a file and execute its contents in the
 import("some/file/location")
 ```
 
-To prevent a runtime-error occurring, an error will be thrown during static analysis (compile-time) by the `Resolver`.
+To prevent a runtime-error occurring, an error will be thrown during static analysis (compile-time) by the `Resolver` when a given import string cannot be found.
 
 Once you have imported a file, its top-level functions and variables will be available to you.
 
@@ -329,6 +329,29 @@ When imported, it can be assigned to a variable and then used like a normal func
 ```
 var(add, import("src/main/resources/add.fox")) // <fn>
 add(10,10) // 20
+```
+
+#### Using import expressions
+
+The `import` expression has two uses. The first is importing built-in libraries:
+
+```
+import("io")
+import("arrays")
+```
+
+The other usage for `import` expressions is for files, the imports are relative to the files location:
+
+```
+// src/main/app.fox
+import("./utils.fox")
+```
+
+The above example could be used to import a file in the same directory as the `app.fox` file, or in any child directories:
+
+```
+// src/main/app.fox
+import("./utilities/str_utils.fox")
 ```
 
 ### `match` expression
