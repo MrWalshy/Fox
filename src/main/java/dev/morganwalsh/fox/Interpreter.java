@@ -160,12 +160,6 @@ public class Interpreter implements Expression.Visitor<Object> {
 
 	@Override
 	public Object visitTernaryExpression(Ternary expression) {
-//		Object ifFalse = interpret(expression.ifFalse);
-//		Object ifTrue = interpret(expression.ifTrue);
-//		Object conditionResult = interpret(expression.condition);
-//		
-//		if (isTruthy(conditionResult)) return ifTrue;
-//		else return ifFalse;
 		// only eval the needed path to prevent infinite recursion
 		if (isTruthy(interpret(expression.condition))) return interpret(expression.ifTrue);
 		else return interpret(expression.ifFalse);
@@ -350,8 +344,6 @@ public class Interpreter implements Expression.Visitor<Object> {
 		return values.toArray();
 	}
 
-	
-
 	@Override
 	public Object visitVariableExpression(Variable expression) {
 		return lookupVariable(expression.name, expression);
@@ -475,11 +467,6 @@ public class Interpreter implements Expression.Visitor<Object> {
 		// no cases matched
 		return null;
 	}
-	/* match 6 {
-	 *   (5 or 6) => true
-	 * }
-	 * 
-	 */
 
 	@Override
 	public Object visitCaseExpression(Case expression) {
