@@ -2,9 +2,9 @@
 defun(eval, (ast, env) -> {  
   match ast[0] {
     "symbol" => getSymbol(ast[1], env)
-    "number" => ast[1]     
+    "number" => Number(ast[1])     
     _ => {
-      // evaluate a procedure call
+      // evaluate a procedure call (get the associated fox function)
       var(procedureCall, eval(ast[0], env))
       
       // evaluate the args following the call
@@ -17,8 +17,8 @@ defun(eval, (ast, env) -> {
         var(arg, ast[argIndex])
         var(evaluatedArg, eval(arg, env))
         // evaluate each argument
-        assign(args, addTo(args, evaluatedArg))        
-        assign(argIndex, argIndex + 1)
+        args <- addTo(args, evaluatedArg)   
+        argIndex <- argIndex + 1
       })   
       procedureCall(args)
     }

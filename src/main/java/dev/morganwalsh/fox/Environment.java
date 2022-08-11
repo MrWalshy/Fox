@@ -20,24 +20,40 @@ public class Environment {
 		variables.put(name, value);
 	}
 	
-	public void assign(Token name, Object value) {
+	public void assign(Token name, Object value, Object arrayIndex) {	
 		// this environment
 		if (variables.containsKey(name.lexeme)) {
+			// if literal is a number, its an array being assigned to
+			if (arrayIndex instanceof Double) {
+				Object[] arr = (Object[]) variables.get(name.lexeme);
+				int index = ((Double) arrayIndex).intValue();
+				arr[index] = value;
+				return;
+			}
 			variables.put(name.lexeme, value);
 			return;
 		}
 		
 		// enclosing environment
 		if (enclosing != null) {
-			enclosing.assign(name, value);
+			enclosing.assign(name, value, arrayIndex);
 			return;
 		}
 		
 		throw new RuntimeError(name, "Undefined variable '" + name.lexeme + "'.");
 	}
 	
-	public void assignAt(Integer hops, Token name, Object value) {
-		ancestor(hops).variables.put(name.lexeme, value);
+	public void assignAt(Integer hops, Token name, Object value, Object arrayIndex) {
+		Environment env = ancestor(hops);
+		
+		// is it an array
+		if (arrayIndex instanceof Double) {
+			Object[] arr = (Object[]) variables.get(name.lexeme);
+			int index = ((Double) arrayIndex).intValue();
+			arr[index] = value;
+			return;
+		}
+		env.variables.put(name.lexeme, value);
 	}
 	
 	private Environment ancestor(Integer hops) {

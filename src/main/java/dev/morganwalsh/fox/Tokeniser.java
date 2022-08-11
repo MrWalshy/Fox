@@ -45,6 +45,7 @@ import static dev.morganwalsh.fox.TokenType.MATCH;
 import static dev.morganwalsh.fox.TokenType.PIPE;
 import static dev.morganwalsh.fox.TokenType.UNDERSCORE;
 import static dev.morganwalsh.fox.TokenType.BREAK;
+import static dev.morganwalsh.fox.TokenType.LEFT_ARROW;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -199,7 +200,8 @@ public class Tokeniser {
 				addToken(match('=') ? EQUAL_EQUAL : EQUAL);
 			break;
 		case '<':
-			addToken(match('=') ? LESS_EQUAL : LESS);
+			if (match('-')) addToken(LEFT_ARROW);
+			else addToken(match('=') ? LESS_EQUAL : LESS);
 			break;
 		case '>':
 			addToken(match('=') ? GREATER_EQUAL : GREATER);

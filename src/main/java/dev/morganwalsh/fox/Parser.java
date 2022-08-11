@@ -111,7 +111,7 @@ public class Parser {
 		if (match(VAR))
 			return var();
 		if (match(ASSIGN))
-			return assign();
+			return assign(previous());
 		if (match(MATCH))
 			return matchExpression();
 		if (match(WHILE))
@@ -297,10 +297,18 @@ public class Parser {
 		return new Expression.Var(identifier, initialiser);
 	}
 
-	private Expression assign() {
-		consume(LEFT_PAREN, "Expect '(' after var assign call.");
-		Token identifier = consume(IDENTIFIER, "Expect identifier as first argument to var assignment.");
-		consume(COMMA, "Expect ',' after identifer");
+	private Expression assign(Token type) {
+		Token identifier = null;
+		if (type.type == ASSIGN) {
+			consume(LEFT_PAREN, "Expect '(' after var assign call.");
+			identifier = consume(IDENTIFIER, "Expect identifier as first argument to var assignment.");
+			consume(COMMA, "Expect ',' after identifer");
+		} else if (type.type == IDENTIFIER) { 
+			identifier = type;
+			consume(LEFT_ARROW, "Expected '<-' after identifer for assignment expression.");
+		} else {
+			error(type, "Unknown token type '" + type.lexeme + "'.");
+		}
 
 		Expression value = null;
 		if (check(LEFT_CURLY)) {
@@ -309,8 +317,29 @@ public class Parser {
 		} else
 			value = ternaryExpression();
 
-		consume(RIGHT_PAREN, "Expect ')' after var definition call arguments.");
+		if (type.type == ASSIGN)
+			consume(RIGHT_PAREN, "Expect ')' after var definition call arguments.");
 		return new Expression.Assign(identifier, value);
+	}
+	
+	private Expression assignArray(Token identifier) {
+		Expression e = new Expression.Variable(identifier);
+		// consume the [
+		consume(LEFT_BRACKET, "Expected an '['.");
+		
+		// consume the index
+		Expression index = expression();
+		// - lexeme in identifier is used by the interpreter
+		// - add the index to the literal instead for array assignment
+		Token token = new Token(identifier.type, identifier.lexeme, index, identifier.line);
+		// consume the ]
+		consume(RIGHT_BRACKET, "Expected an ']' after index.");
+		// consume the <-
+		consume(LEFT_ARROW, "Expected a '<-' after index argument.");
+		// consume the expression
+		Expression value = expression();
+		// return a new assignment
+		return new Expression.Assign(token, value);
 	}
 
 	private Expression ternaryExpression() {
@@ -455,7 +484,25 @@ public class Parser {
 			upperBound = expression();
 		}
 		Token closingBracket = consume(RIGHT_BRACKET, "Expected a ']' to close the array call.");
-		return new Expression.ArrayCall(expression, index, upperBound, closingBracket);
+		
+		// check for assignment call, consume if present
+//		Token assignmentArrow = check(LEFT_ARROW) ? advance() : null;
+//		Expression afterArrow = null;
+		// create a new assignment expression and return that if 
+		// assignment arrow is not null, it will need to contain the array call
+		// to be assigned to
+		// - pass the assignment arrow as the closing bracket if it is not null;
+//		if (assignmentArrow != null) {
+//			closingBracket = assignmentArrow;
+//			// get the expression after the assignment arrow
+//			afterArrow = expression();
+//		}
+		Expression arrayCall = new Expression.ArrayCall(expression, index, upperBound, closingBracket);;
+		
+		// if there was an assignment arrow, return an assignment expression
+//		return new Expression.Assign(assignmentArrow, arrayCall)
+		
+		return arrayCall; 
 	}
 
 	/**
@@ -498,8 +545,18 @@ public class Parser {
 		if (match(NUMBER, STRING))
 			return new Expression.Literal(previous().literal);
 
-		if (match(IDENTIFIER))
-			return new Expression.Variable(previous());
+		if (match(IDENTIFIER)) {
+			if (check(LEFT_BRACKET)) {
+				// peek ahead and look for the closing bracket, if what follows
+				// is not an arrow, it is not an assignment to an array
+				// - let it fall through for the call expression
+				int i = 0;
+				while (!checkAhead(RIGHT_BRACKET, i) && !isAtEnd()) i++;
+				if (checkAhead(LEFT_ARROW, i + 1)) return assignArray(previous());
+			}
+			if (check(LEFT_ARROW)) return assign(previous());
+			else return new Expression.Variable(previous());
+		}
 
 		if (match(LEFT_PAREN)) {
 			// look for arrow
@@ -531,6 +588,7 @@ public class Parser {
 		if (previous().type == COMMA)
 			error(previous(), "Expected an expression after comma");
 		Token rightBracket = consume(RIGHT_BRACKET, "Expect ']' after array declaration");
+
 		return new Expression.Array(elements, rightBracket);
 	}
 }

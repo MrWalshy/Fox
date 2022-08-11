@@ -1,5 +1,23 @@
 //import("./utils.fox")
 
 //print(add(1,2))
+import("io")
+import("arrays")
+//import("./utils/strUtility.fox")
 
-import("./utils/strUtility.fox")
+var(x, 32)
+var(y)
+println("")
+y <- x <- 50
+println(x)
+println(y)
+
+var(arr, Array(5))
+var(i, 0)
+
+while (i < len(arr), {
+  arr[i] <- i + i
+  i <- i + 1
+})
+
+printArr(arr)

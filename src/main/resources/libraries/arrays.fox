@@ -31,7 +31,7 @@ defun(printArr, (arr) -> {
         print(arr[i])
       }
       i + 1 < len(arr) ? print(", ") : null
-      assign(i, i+1)
+      i <- i + 1
     })
   })
   print("[")

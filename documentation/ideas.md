@@ -1,5 +1,21 @@
 # Ideas
 
+## Alternate assignment syntax
+
+The current assignment syntax is horribly verbose:
+
+```
+assign(a, "Hello")
+```
+
+A less verbose version might look like:
+
+```
+identifier <- newValue
+```
+
+The `newValue` may be any ternary or block expression in the grammar set, this keeps in line with the current assignment rule and merely requires modifying the tokeniser and parser to account for the new *left arrow* symbol.
+
 ## Features for arrays
 
 A negative indices corresponding to reverse access of the array, like in Python:

@@ -5,6 +5,6 @@ defun(printAll, (arr) -> {
   
   while(i < len(arr), {
     println(arr[i])
-    assign(i, i + 1)
+    i < i + 1
   })
 })

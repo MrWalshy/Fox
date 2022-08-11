@@ -359,8 +359,12 @@ public class Interpreter implements Expression.Visitor<Object> {
 		
 		Integer hops = locals.get(expression);
 		
-		if (hops != null) currentEnvironment.assignAt(hops, expression.name, value);
-		else globals.assign(expression.name, value);
+		Object arrayIndex = null;
+		if (expression.name.literal instanceof Expression) 
+			arrayIndex = interpret((Expression)expression.name.literal);
+		
+		if (hops != null) currentEnvironment.assignAt(hops, expression.name, value, arrayIndex);
+		else globals.assign(expression.name, value, arrayIndex);
 		return value;
 	}
 

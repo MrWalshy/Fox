@@ -1,6 +1,21 @@
 var(parseError, '(message) -> { println("Parse error: " + message) })
 
-// creates an abstract syntax tree
+// creates a node for the syntax tree
+// - a node is an array with two items: a type, and the lexeme/token itself
+defun(atom, (token) -> {
+  defun(node, (type, token) -> [type, token])
+
+  // what's the type of the passed in token
+  match typeOf(token) {
+    "number" => node("number", token)
+    _        => node("symbol", token)
+  }
+})
+
+/*
+  Creates an abstract syntax tree from an array of tokens where each node is represented as an 
+  array with a type and a token.
+*/
 var(parse, '(tokens) -> {
 
   defun(innerParse, () -> {
@@ -9,33 +24,31 @@ var(parse, '(tokens) -> {
       var(token, tokens[0])
       
       // remove front token
-      assign(tokens, popFront(tokens))
+      tokens <- popFront(tokens)
       
       match token {
         "(" => {
+          // entered an expression
           var(nodes, [])
           
           while(tokens[0] != ")", {
-            assign(nodes, merge(nodes, [innerParse()]))
+            // recursive call
+            // - merges the current array of nodes with the result of the recursive call (a new node)
+            nodes <- merge(nodes, [innerParse()])
           })
           // remove the ')'
           assign(tokens, popFront(tokens))
           nodes
         }
         ")" => parseError("Unexpected ')'.")
-        _   => atom(token)
+        "\"" => {
+          println("Strings not yet implemented")
+          atom(token)
+        }
+        _   => atom(token) // must be an atom, a number or symbol
       }
     }
   })
   
   innerParse()
-})
-
-// creates a node for the syntax tree
-defun(atom, (token) -> {
-  defun(node, (type, token) -> [type, token])
-
-  var(type, typeOf(token))
-  var(isNumber, type == "number")
-  node(isNumber ? "number" : "symbol", token)
 })

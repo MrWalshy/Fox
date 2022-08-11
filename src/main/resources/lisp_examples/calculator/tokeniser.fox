@@ -1,8 +1,9 @@
 /* 
-  Creates an array of tokens with whitespace trimmed
+  Creates an array of tokens with whitespace trimmed. Every '(' and ')' have a single character of space
+  inserted around them for parsing.
 */
 var(tokenise, '(str) -> {
   var(output, replace(str, "\\(", " ( "))
-  assign(output, replace(output, "\\)", " ) "))
-  split(trim(output), "\\s+")
+  output <- replace(output, "\\)", " ) ")
+  split(trim(output), "\\s+") // split on whitespace
 })
