@@ -1,0 +1,10 @@
+version: "3.8"
+services:
+  fox:
+    build: ./
+    ports:
+    - target: 80             # docker run -p HOST:80
+      published: 80          # docker run -p 80: CONTAINER
+      protocol: tcp
+    stdin_open: true         # docker run -i
+    tty: true                # docker run -t
